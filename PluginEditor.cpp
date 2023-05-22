@@ -10,7 +10,7 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-//audioProcessor -> PluginEditor에서 audioProcessor에 접근하는 포인터.
+//audioProcessor -> PluginEditor에서 PluginProcessor에 접근하는 포인터.
 //둘 간의 상호작용은 에디터에서 프로세서에 액세스하고 값을 돌려 받는 방식이 되어야지, 반대가 되어서는 안됨
 //반대가 될 경우 오디오가 끊길 위험성이 있음.
 //예를 들면 PluginProcessor의 class안에 hello라는 변수 또는 함수가 있다면, PluginEditor안에서 audioProcess.hello나 audioProcess.hello()와 같이 접근함
