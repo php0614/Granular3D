@@ -128,11 +128,22 @@ bool Granular3DAudioProcessor::isBusesLayoutSupported (const BusesLayout& layout
 }
 #endif
 
+//buferToFill이라는 이름의 AudioSourceChannelInfo는 standalone프로그램 일 경우 흔히 쓰이는 변수명임
+//플러그인의 processBlock에서는 그것이 기본 제공되지 않으며 아래를 통해 똑같은 것을 생성해 줄 수 있음.
+//여기서 이것을 만드는 이유는 아래 transportSource가 AudioSourceChannelInfo를 입력형으로 받기 때문
+juce::AudioSourceChannelInfo bufferToFill;
+
 void Granular3DAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
+
+    //bufferToFill의 정보를 채우는 과정
+    bufferToFill.buffer      = &buffer;
+    bufferToFill.startSample = 0;
+    bufferToFill.numSamples  = buffer.getNumSamples();
+    //////
 
     // In case we have more outputs than inputs, this code clears any output
     // channels that didn't contain input data, (because these aren't
@@ -142,14 +153,6 @@ void Granular3DAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
-
-    //buferToFill이라는 이름의 AudioSourceChannelInfo는 standalone프로그램 일 경우 흔히 쓰이는 변수명임
-    //플러그인의 processBlock에서는 그것이 기본 제공되지 않으며 아래를 통해 똑같은 것을 생성해 줄 수 있음.
-    juce::AudioSourceChannelInfo bufferToFill;
-    bufferToFill.buffer      = &buffer;
-    bufferToFill.startSample = 0;
-    bufferToFill.numSamples  = buffer.getNumSamples();
-    //////
     
     //transportSource(juce의 AudioTransport 클래스로 만든 변수)는 프로세서에서 processBlock()을 통해 최종적으로 버퍼를 채워 소리가 플레이 되게 만듬
     transportSource.getNextAudioBlock(bufferToFill);
