@@ -73,8 +73,8 @@ void Granular3DAudioProcessorEditor::resized()
 
 }
 
-//오픈버튼 시 chooser 인터페이스로 wav파일을 읽어서 juce:File 로 formatManager에 넣어주고, 그 포맷이 맞추어진 데이터로부터 reader를 생성해서 transportSource(juce의 AudioTransport 클래스로 만든 변수)에 넣어주면 끝
-//transportSource(juce의 AudioTransport 클래스로 만든 변수)는 프로세서에서 processBlock()을 통해 최종적으로 버퍼를 채워 소리가 플레이 되게 만듬
+//오픈버튼 시 chooser 인터페이스로 wav파일을 읽어서 juce:File 로 formatManager에 넣어주고, 그 포맷이 맞추어진 데이터로부터 reader를 생성해서
+//audioProcessor의 setTransportSource() 펑션을 통해 프로세서 측으로 read정보가 넘어가서, 그곳에서 transportSource(juce의 AudioTransport 클래스로 만든 변수)에 들어가서 .setSource 됨.
 void Granular3DAudioProcessorEditor::openButtonClicked()
 {
     
