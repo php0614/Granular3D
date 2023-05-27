@@ -41,7 +41,7 @@ private:
 
     void clearButtonClicked();
     
-    float generateHannWindow(int size, int pos);
+    double generateHannWindow(int size, int pos);
     
 
    //==========================================================================
@@ -54,15 +54,15 @@ private:
     int grainSize = 0;
     //std::vector<float> windowVector(0);
     float* windowArray;
-    
-    int windowPosition = 0;
-    
-    
     int position = 0;
     int startPosition = 1024;
+    int windowPosition = 0;
+    int newStartPosition = 1024;
+    int newGrainSize = 0;
+    int windowSize = 0;
+    
    std::unique_ptr<juce::FileChooser> chooser;
-   
-   juce::dsp::WindowingFunction<float> theWindow;
+
 
    juce::AudioFormatManager formatManager;
    juce::AudioSampleBuffer fileBuffer;

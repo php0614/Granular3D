@@ -1,7 +1,7 @@
 #include "MainComponent.h"
 
 //==============================================================================
-MainComponent::MainComponent() : theWindow(0, juce::dsp::WindowingFunction<float>::hann)
+MainComponent::MainComponent()
 {
     addAndMakeVisible (openButton);
     openButton.setButtonText ("Open...");
@@ -15,14 +15,14 @@ MainComponent::MainComponent() : theWindow(0, juce::dsp::WindowingFunction<float
     grainPositionSlider.setRange (0, 80000, 1);
     grainPositionSlider.setValue(512);
     grainPositionSlider.setTitle("Grain Position");
-    grainPositionSlider.onValueChange = [this] {startPosition = grainPositionSlider.getValue(); };
+    grainPositionSlider.onValueChange = [this] {newStartPosition = grainPositionSlider.getValue(); };
     
     
     addAndMakeVisible (grainLengthSlider);
     grainLengthSlider.setRange (10, 8192, 1);
     grainLengthSlider.setValue(1024);
     grainLengthSlider.setTitle("Grain Length");
-    grainLengthSlider.onValueChange = [this] { grainSize = grainLengthSlider.getValue();
+    grainLengthSlider.onValueChange = [this] { newGrainSize = grainLengthSlider.getValue();
     };
 
     setSize (640, 480);
@@ -33,12 +33,9 @@ MainComponent::MainComponent() : theWindow(0, juce::dsp::WindowingFunction<float
     grainSize = 1024;
     windowPosition = 0;
     
-    windowArray = new float[grainSize];
+    newStartPosition = startPosition;
+    newGrainSize = grainSize;
     
-    theWindow.fillWindowingTables(windowArray, grainSize, juce::dsp::WindowingFunction<float>::hann);
-    
-    
-
 }
 
 MainComponent::~MainComponent()
@@ -99,8 +96,29 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                 {
                     //windowPosition은 position(전체 버퍼 재생에 쓰이는 위치 정보)와 다름. position을 그대로 윈도우의 위치를 가져오는데 쓰면, 윈도우가 갑자기 중간에서 0으로 뛰어버리는 일이 일어나 오디오 퀄리티가 안좋아짐
                     //따라서 따로 windowPosition을 써서 별도로 진행되게 해야함
-                    processBuffer[sample] *= generateHannWindow(grainSize, windowPosition);
-                    windowPosition = (windowPosition+1) %grainSize;
+                        
+                    processBuffer[sample] *= generateHannWindow(windowSize, windowPosition);
+                    
+                    //부드럽게 window가 0위치일때 새로운 값 입력을 반영
+                    if(windowPosition == 0)
+                    {
+                        grainSize = newGrainSize;
+                        startPosition = newStartPosition;
+                        windowPosition = 1;
+                        
+                        if(bufferSamplesRemaining < grainSize)
+                            windowSize = bufferSamplesRemaining;
+                        else
+                            windowSize = grainSize;
+                    }
+                    else
+                    {
+                        windowPosition = (windowPosition+1) %grainSize;
+                    }
+                    
+                    
+                        
+                    
                 }
 
 
@@ -213,7 +231,7 @@ void MainComponent::clearButtonClicked()
     shutdownAudio();
 }
 
-float MainComponent::generateHannWindow(int size, int pos){
+double MainComponent::generateHannWindow(int size, int pos){
         return 0.5 * (1 - cos(2*juce::MathConstants<float>::pi*pos/size));
         
 }
