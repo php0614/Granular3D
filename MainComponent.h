@@ -37,6 +37,8 @@ public:
     void resized() override;
     
     void paint (juce::Graphics& g) override;
+    
+    void update();
 
 private:
     void openButtonClicked();
@@ -54,7 +56,9 @@ private:
     juce::TextButton visualizeButton;
     juce::Slider    grainPositionSlider;
     juce::Slider     grainLengthSlider;
-
+    juce::Slider    panningSlider;
+    
+    float pannings = 0.5;
     
     int grainSize = 0;
     //std::vector<float> windowVector(0);

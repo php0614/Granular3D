@@ -20,7 +20,13 @@ MainComponent::MainComponent()
     grainPositionSlider.setRange (0, 80000, 1);
     grainPositionSlider.setValue(512);
     grainPositionSlider.setTitle("Grain Position");
-    grainPositionSlider.onValueChange = [this] {newStartPosition = grainPositionSlider.getValue(); };
+    grainPositionSlider.onValueChange = [this] {newStartPosition = grainPositionSlider.getValue();};
+    
+    addAndMakeVisible (panningSlider);
+    panningSlider.setRange (0, 1, 0.01);
+    panningSlider.setValue(0.5);
+    panningSlider.setTitle("Panning Position");
+    panningSlider.onValueChange = [this] {pannings = panningSlider.getValue(); repaint(); };
     
     
     addAndMakeVisible (grainLengthSlider);
@@ -131,9 +137,6 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
         }
 
 
-            
-        
-
 
         outputSamplesRemaining -= samplesThisTime;
         outputSamplesOffset += samplesThisTime;
@@ -179,6 +182,8 @@ void MainComponent::resized()
     
     if (oscilloscope2D != nullptr)
         oscilloscope2D->setBounds (10, 400, getWidth() - 20, getHeight()-50);
+    
+    panningSlider.setBounds (10, 110, getWidth() - 20, 20);
 }
 
 
@@ -199,12 +204,15 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
 void MainComponent::paint (juce::Graphics& g)
 {
     
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    //g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
-
-    // You can add your drawing code here!
+    g.setColour (juce::Colours::sandybrown);
+    float a = pannings;
+    g.drawEllipse(getWidth() * a, getHeight() * 0.5, 30, 30, 3);
 }
 
+void MainComponent::update()
+{
+    
+}
 
 //==============================================================================
 
