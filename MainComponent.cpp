@@ -26,7 +26,8 @@ MainComponent::MainComponent()
     panningSlider.setRange (0, 1, 0.01);
     panningSlider.setValue(0.5);
     panningSlider.setTitle("Panning Position");
-    panningSlider.onValueChange = [this] {pannings = panningSlider.getValue(); repaint(); };
+    panningSlider.onValueChange = [this] {pannings = panningSlider.getValue()+currentRand;
+        repaint(); };
     
     
     addAndMakeVisible (grainLengthSlider);
@@ -87,8 +88,6 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                  int     numSamples
              )
              */
-        
-        
             
         //아웃풋 버퍼를 fileBuffer로 부터 일정 부분 가져와서 채움
             bufferToFill.buffer->copyFrom (channel,                                        
@@ -98,21 +97,28 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                                            position,
                                            samplesThisTime);
             //std::cout<<position<<std::endl;
-            
+            //processBuffer를 아웃풋으로 만드는 부분(getWritePointer)
             auto processBuffer = bufferToFill.buffer->getWritePointer(channel);
             
-//            if(channel == 0)
-//            {
-            // Write to Ring Buffer
+            if(channel == 0)
+            {
+            // Write to Ring Buffer: Do it only when Channel 0
             ringBuffer->writeSamples (*bufferToFill.buffer, bufferToFill.startSample, bufferToFill.numSamples);
-//            }
+            }
             
             for (int sample = 0; sample < bufferToFill.numSamples; ++sample)
                 {
                     //windowPosition은 position(전체 버퍼 재생에 쓰이는 위치 정보)와 다름. position을 그대로 윈도우의 위치를 가져오는데 쓰면, 윈도우가 갑자기 중간에서 0으로 뛰어버리는 일이 일어나 오디오 퀄리티가 안좋아짐
                     //따라서 따로 windowPosition을 써서 별도로 진행되게 해야함
                         
+                    //processBuffer가 곧 아웃풋
                     processBuffer[sample] *= generateHannWindow(windowSize, windowPosition);
+                    
+                     currentRand = abs(random.nextFloat()) * 0.1;
+                    if(channel == 0)
+                        processBuffer[sample] *= (1-(pannings * currentRand));
+                    if(channel == 1)
+                        processBuffer[sample] *= (pannings* currentRand);
                     
                     if(channel == 0)
                     {
@@ -123,6 +129,7 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                             startPosition = newStartPosition;
                             windowPosition = 1;
                             
+                            //원래는 grainSize로 window크기를 만들지만, 재생해야할 버퍼가 grainSize보다 작으면, 윈도우 사이즈 길이로 만듬
                             if(bufferSamplesRemaining < grainSize)
                                 windowSize = bufferSamplesRemaining;
                             else
@@ -150,12 +157,14 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
             windowPosition = 0;
         }else{
             position = position+samplesThisTime;
+       
+                
         }
         
       
     }
-}
 
+}
 
 
 void MainComponent::releaseResources()
@@ -235,23 +244,23 @@ void MainComponent::openButtonClicked()
         if (file == juce::File{})
             return;
 
-        std::unique_ptr<juce::AudioFormatReader> reader (formatManager.createReaderFor (file)); // [2]
+        std::unique_ptr<juce::AudioFormatReader> reader (formatManager.createReaderFor (file));
 
         if (reader.get() != nullptr)
         {
-            auto duration = (float) reader->lengthInSamples / reader->sampleRate;               // [3]
+            auto duration = (float) reader->lengthInSamples / reader->sampleRate;
 
             if (duration < 10)
             {
-                fileBuffer.setSize ((int) reader->numChannels, (int) reader->lengthInSamples);  // [4]
-                reader->read (&fileBuffer,                                                      // [5]
-                              0,                                                                //  [5.1]
-                              (int) reader->lengthInSamples,                                    //  [5.2]
-                              0,                                                                //  [5.3]
-                              true,                                                             //  [5.4]
-                              true);                                                            //  [5.5]
-                position = startPosition;                                                                   // [6]
-                setAudioChannels (0, (int) reader->numChannels);                                // [7]
+                fileBuffer.setSize ((int) reader->numChannels, (int) reader->lengthInSamples);
+                reader->read (&fileBuffer,
+                              0,
+                              (int) reader->lengthInSamples,
+                              0,
+                              true,
+                              true);
+                position = startPosition;
+                setAudioChannels (0, (int) reader->numChannels);
             }
             else
             {
