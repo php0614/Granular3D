@@ -1,5 +1,6 @@
 #include "MainComponent.h"
 
+
 //==============================================================================
 MainComponent::MainComponent()
 {
@@ -10,6 +11,10 @@ MainComponent::MainComponent()
     addAndMakeVisible (clearButton);
     clearButton.setButtonText ("Clear");
     clearButton.onClick = [this] { clearButtonClicked(); };
+    
+    addAndMakeVisible (visualizeButton);
+    visualizeButton.setButtonText ("Visualize");
+    visualizeButton.onClick = [this] { visualizeButtonClicked(); };
     
     addAndMakeVisible (grainPositionSlider);
     grainPositionSlider.setRange (0, 80000, 1);
@@ -25,7 +30,7 @@ MainComponent::MainComponent()
     grainLengthSlider.onValueChange = [this] { newGrainSize = grainLengthSlider.getValue();
     };
 
-    setSize (640, 480);
+    setSize (1024, 768);
 
     formatManager.registerBasicFormats();
     
@@ -64,8 +69,8 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
         //예를 들면 아웃풋 버퍼가 100이고 플레이 해야할 샘플이 22567이라면, 맨 끝에는 67샘플이 남을 것임.
         auto samplesThisTime = juce::jmin (outputSamplesRemaining, bufferSamplesRemaining); // [11]
 
-//        for (auto channel = 0; channel < numOutputChannels; ++channel)
-//        {
+        for (auto channel = 0; channel < numOutputChannels; ++channel)
+        {
             /*
              void AudioBuffer< Type >::copyFrom    (
                  int     destChannel,
@@ -77,7 +82,7 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
              )
              */
         
-        int channel = 0;
+        
             
         //아웃풋 버퍼를 fileBuffer로 부터 일정 부분 가져와서 채움
             bufferToFill.buffer->copyFrom (channel,                                        
@@ -89,9 +94,13 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
             //std::cout<<position<<std::endl;
             
             auto processBuffer = bufferToFill.buffer->getWritePointer(channel);
-      
-
-
+            
+//            if(channel == 0)
+//            {
+            // Write to Ring Buffer
+            ringBuffer->writeSamples (*bufferToFill.buffer, bufferToFill.startSample, bufferToFill.numSamples);
+//            }
+            
             for (int sample = 0; sample < bufferToFill.numSamples; ++sample)
                 {
                     //windowPosition은 position(전체 버퍼 재생에 쓰이는 위치 정보)와 다름. position을 그대로 윈도우의 위치를 가져오는데 쓰면, 윈도우가 갑자기 중간에서 0으로 뛰어버리는 일이 일어나 오디오 퀄리티가 안좋아짐
@@ -99,27 +108,31 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                         
                     processBuffer[sample] *= generateHannWindow(windowSize, windowPosition);
                     
-                    //부드럽게 window가 0위치일때 새로운 값 입력을 반영
-                    if(windowPosition == 0)
+                    if(channel == 0)
                     {
-                        grainSize = newGrainSize;
-                        startPosition = newStartPosition;
-                        windowPosition = 1;
-                        
-                        if(bufferSamplesRemaining < grainSize)
-                            windowSize = bufferSamplesRemaining;
+                        //부드럽게 window가 0위치일때 새로운 값 입력을 반영
+                        if(windowPosition == 0)
+                        {
+                            grainSize = newGrainSize;
+                            startPosition = newStartPosition;
+                            windowPosition = 1;
+                            
+                            if(bufferSamplesRemaining < grainSize)
+                                windowSize = bufferSamplesRemaining;
+                            else
+                                windowSize = grainSize;
+                        }
                         else
-                            windowSize = grainSize;
+                        {
+                            windowPosition = (windowPosition+1) %grainSize;
+                        }
                     }
-                    else
-                    {
-                        windowPosition = (windowPosition+1) %grainSize;
-                    }
-                    
-                    
-                        
-                    
                 }
+        }
+
+
+            
+        
 
 
         outputSamplesRemaining -= samplesThisTime;
@@ -145,35 +158,49 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
 void MainComponent::releaseResources()
 {
     fileBuffer.setSize (0, 0);
+    if (oscilloscope2D != nullptr)
+           {
+               oscilloscope2D->stop();
+               removeChildComponent (oscilloscope2D);
+               delete oscilloscope2D;
+           }
+    
+    delete ringBuffer;
 }
 
 void MainComponent::resized()
 {
     openButton .setBounds (10, 10, getWidth() - 20, 20);
-    clearButton.setBounds (10, 40, getWidth() - 20, 20);
+    clearButton.setBounds (10, 50, getWidth() - 20, 20);
+    visualizeButton.setBounds (10, 90, getWidth() - 20, 20);
     auto sliderLeft = 120;
     grainPositionSlider.setBounds (sliderLeft, 200, getWidth() - sliderLeft - 10, 20);
     grainLengthSlider.setBounds (sliderLeft, 300, getWidth() - sliderLeft - 10, 20);
+    
+    if (oscilloscope2D != nullptr)
+        oscilloscope2D->setBounds (10, 400, getWidth() - 20, getHeight()-50);
 }
 
 
 void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {
-    // This function will be called when the audio device is started, or when
-    // its settings (i.e. sample rate, block size, etc) are changed.
+    // Setup Ring Buffer of GLfloat's for the visualizer to use
+            // Uses two channels
+            
+    ringBuffer = new RingBuffer<GLfloat> (2, samplesPerBlockExpected * 10);
+    oscilloscope2D = new Oscilloscope2D (ringBuffer);
+    addChildComponent (oscilloscope2D);
 
-    // You can use this function to initialise any resources you might need,
-    // but be careful - it will be called on the audio thread, not the GUI thread.
-
-    // For more details, see the help for AudioProcessor::prepareToPlay()
+            
 }
 
 
 
 void MainComponent::paint (juce::Graphics& g)
 {
+    
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    //g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
 
     // You can add your drawing code here!
 }
@@ -185,7 +212,7 @@ void MainComponent::paint (juce::Graphics& g)
 
 void MainComponent::openButtonClicked()
 {
-    shutdownAudio();                                                                            // [1]
+    shutdownAudio();
 
     chooser = std::make_unique<juce::FileChooser> ("Select a Wave file shorter than 2 seconds to play...",
                                                    juce::File{},
@@ -224,12 +251,31 @@ void MainComponent::openButtonClicked()
             }
         }
     });
+
 }
 
 void MainComponent::clearButtonClicked()
 {
     shutdownAudio();
+    if (oscilloscope2D != nullptr)
+           {
+               oscilloscope2D->stop();
+               removeChildComponent (oscilloscope2D);
+               delete oscilloscope2D;
+           }
+    
 }
+
+void MainComponent::visualizeButtonClicked()
+{
+    oscilloscope2D->start();
+
+    oscilloscope2D->setVisible(true);
+    
+    if (oscilloscope2D != nullptr)
+        oscilloscope2D->setBounds (10, 400, getWidth()/2, getHeight()/2);
+}
+
 
 double MainComponent::generateHannWindow(int size, int pos){
         return 0.5 * (1 - cos(2*juce::MathConstants<float>::pi*pos/size));
