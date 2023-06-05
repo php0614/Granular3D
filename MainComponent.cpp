@@ -17,27 +17,32 @@ MainComponent::MainComponent()
     visualizeButton.onClick = [this] { visualizeButtonClicked(); };
     
     addAndMakeVisible (grainPositionSlider);
-    grainPositionSlider.setRange (0, 80000, 1);
-    grainPositionSlider.setValue(512);
+    grainPositionSlider.setRange (0, 34800, 1);
+    grainPositionSlider.setValue(24745);
     grainPositionSlider.setTitle("Grain Position");
     grainPositionSlider.onValueChange = [this] {newStartPosition = grainPositionSlider.getValue();};
+    
+    addAndMakeVisible (grainLengthSlider);
+    grainLengthSlider.setRange (10, 8192, 1);
+    grainLengthSlider.setValue(5070);
+    grainLengthSlider.setTitle("Grain Length");
+    grainLengthSlider.onValueChange = [this] { newGrainSize = grainLengthSlider.getValue();
+    };
     
     addAndMakeVisible (panningSlider);
     panningSlider.setRange (0, 1, 0.01);
     panningSlider.setValue(0.5);
     panningSlider.setTitle("Panning Position");
-    panningSlider.onValueChange = [this] {pannings = panningSlider.getValue()+currentRand;
-        repaint(); };
+    //panningSlider.onValueChange = [this] {pannings = panningSlider.getValue();};
+    
+    addAndMakeVisible (panningRandomizeSlider);
+    panningRandomizeSlider.setRange (0, 0.5, 0.01);
+    panningRandomizeSlider.setValue(0);
+    panningRandomizeSlider.setTitle("Panning Randomize");
     
     
-    addAndMakeVisible (grainLengthSlider);
-    grainLengthSlider.setRange (10, 8192, 1);
-    grainLengthSlider.setValue(1024);
-    grainLengthSlider.setTitle("Grain Length");
-    grainLengthSlider.onValueChange = [this] { newGrainSize = grainLengthSlider.getValue();
-    };
 
-    setSize (1024, 768);
+    setSize (1200, 1200);
 
     formatManager.registerBasicFormats();
     
@@ -48,11 +53,46 @@ MainComponent::MainComponent()
     newStartPosition = startPosition;
     newGrainSize = grainSize;
     
+    startTimer(33);
+    
+    ////////////////////////
+    juce::File pathToMyExecutable = juce::File::getSpecialLocation (juce::File::SpecialLocationType::currentExecutableFile);
+    auto Newpath = pathToMyExecutable.getParentDirectory().getParentDirectory().getFullPathName();
+    juce::File initFile(Newpath+"/"+"ASMR_Voice.wav");
+    std::cout<<Newpath<<std::endl;
+    
+    std::unique_ptr<juce::AudioFormatReader> reader (formatManager.createReaderFor (initFile));
+
+    if (reader.get() != nullptr)
+    {
+        auto duration = (float) reader->lengthInSamples / reader->sampleRate;
+
+        if (duration < 10)
+        {
+            fileBuffer.setSize ((int) reader->numChannels, (int) reader->lengthInSamples);
+            reader->read (&fileBuffer,
+                          0,
+                          (int) reader->lengthInSamples,
+                          0,
+                          true,
+                          true);
+            position = startPosition;
+            setAudioChannels (0, (int) reader->numChannels);
+        }
+        else
+        {
+            // handle the error that the file is 2 seconds or longer..
+        }
+    }
+    
+    
+    
 }
 
 MainComponent::~MainComponent()
 {
     shutdownAudio();
+    stopTimer();
 }
 
 //==============================================================================
@@ -114,11 +154,10 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                     //processBuffer가 곧 아웃풋
                     processBuffer[sample] *= generateHannWindow(windowSize, windowPosition);
                     
-                     currentRand = abs(random.nextFloat()) * 0.1;
                     if(channel == 0)
-                        processBuffer[sample] *= (1-(pannings * currentRand));
+                        processBuffer[sample] *= (1-currentGrainPan);
                     if(channel == 1)
-                        processBuffer[sample] *= (pannings* currentRand);
+                        processBuffer[sample] *= currentGrainPan;
                     
                     if(channel == 0)
                     {
@@ -134,6 +173,9 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                                 windowSize = bufferSamplesRemaining;
                             else
                                 windowSize = grainSize;
+                            
+                            //grain panning 업데이트 - 하나의 grain은 각자 하나의 고정된 panning값을 지님. grain하나가 재생될 동안에는 panning position은 바뀌지 않음.
+                            currentGrainPan = pannings;
                         }
                         else
                         {
@@ -182,17 +224,22 @@ void MainComponent::releaseResources()
 
 void MainComponent::resized()
 {
-    openButton .setBounds (10, 10, getWidth() - 20, 20);
-    clearButton.setBounds (10, 50, getWidth() - 20, 20);
-    visualizeButton.setBounds (10, 90, getWidth() - 20, 20);
-    auto sliderLeft = 120;
-    grainPositionSlider.setBounds (sliderLeft, 200, getWidth() - sliderLeft - 10, 20);
-    grainLengthSlider.setBounds (sliderLeft, 300, getWidth() - sliderLeft - 10, 20);
+    int margin = 40;
+    int leftMargin = 10;
+    openButton .setBounds (leftMargin, 10, getWidth() - 20, 20);
+    clearButton.setBounds (leftMargin, margin+10, getWidth() - 20, 20);
+    visualizeButton.setBounds (leftMargin, margin*2+10, getWidth() - 20, 20);
+    
+    grainPositionSlider.setBounds (leftMargin, margin*3+10, getWidth() - leftMargin - 10, 20);
+    grainLengthSlider.setBounds (leftMargin, margin*4+10, getWidth() - leftMargin - 10, 20);
+    
+    panningRandomizeSlider.setBounds (leftMargin, margin*5+10, getWidth() - 20, 20);
+    panningSlider.setBounds (leftMargin, margin*6+10, getWidth(), 20);
     
     if (oscilloscope2D != nullptr)
-        oscilloscope2D->setBounds (10, 400, getWidth() - 20, getHeight()-50);
+        oscilloscope2D->setBounds (10, 450, getWidth() - 20, getHeight()-50);
     
-    panningSlider.setBounds (10, 110, getWidth() - 20, 20);
+
 }
 
 
@@ -215,12 +262,18 @@ void MainComponent::paint (juce::Graphics& g)
     
     g.setColour (juce::Colours::sandybrown);
     float a = pannings;
-    g.drawEllipse(getWidth() * a, getHeight() * 0.5, 30, 30, 3);
+    g.fillAll(juce::Colours::black);
+    g.setColour(juce::Colours::orange);
+    g.fillEllipse(getWidth() * a, getHeight() * 0.42, 40, 40);
+    
 }
 
-void MainComponent::update()
+void MainComponent::mouseMove (const juce::MouseEvent& event)
 {
-    
+//    mouseX = event.position.getX() /getWidth();
+//    panningSlider.setValue(mouseX);
+//    mouseY = event.position.getY() /getHeight() * 8000;
+//    grainPositionSlider.setValue(mouseY);
 }
 
 //==============================================================================
@@ -297,4 +350,11 @@ void MainComponent::visualizeButtonClicked()
 double MainComponent::generateHannWindow(int size, int pos){
         return 0.5 * (1 - cos(2*juce::MathConstants<float>::pi*pos/size));
         
+}
+
+
+void MainComponent::timerCallback(){
+    currentRand = (random.nextFloat() -0.5) * 2 * panningRandomizeSlider.getValue();
+    pannings = panningSlider.getValue()+currentRand;
+    repaint();
 }

@@ -21,7 +21,7 @@ END_JUCE_PIP_METADATA
 #pragma once
 
 //==============================================================================
-class MainComponent   : public juce::AudioAppComponent
+class MainComponent   : public juce::AudioAppComponent, public juce::Timer
 {
 public:
     MainComponent();
@@ -38,7 +38,9 @@ public:
     
     void paint (juce::Graphics& g) override;
     
-    void update();
+    void timerCallback() override;
+    
+    void mouseMove (const juce::MouseEvent& event);
 
 private:
     void openButtonClicked();
@@ -57,6 +59,7 @@ private:
     juce::Slider    grainPositionSlider;
     juce::Slider     grainLengthSlider;
     juce::Slider    panningSlider;
+    juce::Slider    panningRandomizeSlider;
     
     float pannings = 0.5;
     
@@ -71,7 +74,10 @@ private:
     int newGrainSize = 0;
     int windowSize = 0;
     
-    float pan = 0.5;
+    float mouseX = 0;
+    float mouseY = 0;
+    
+    float currentGrainPan = 0.5;
 
     
    std::unique_ptr<juce::FileChooser> chooser;
