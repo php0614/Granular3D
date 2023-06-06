@@ -16,6 +16,7 @@ MainComponent::MainComponent()
     visualizeButton.setButtonText ("Visualize");
     visualizeButton.onClick = [this] { visualizeButtonClicked(); };
     
+    
     addAndMakeVisible (grainPositionSlider);
     grainPositionSlider.setRange (0, 34800, 1);
     grainPositionSlider.setValue(24745);
@@ -29,18 +30,24 @@ MainComponent::MainComponent()
     grainLengthSlider.onValueChange = [this] { newGrainSize = grainLengthSlider.getValue();
     };
     
-    addAndMakeVisible (panningSlider);
-    panningSlider.setRange (0, 1, 0.01);
-    panningSlider.setValue(0.5);
-    panningSlider.setTitle("Panning Position");
-    //panningSlider.onValueChange = [this] {pannings = panningSlider.getValue();};
+    addAndMakeVisible(grainNumberSlider);
+    grainNumberSlider.setRange (0, 10, 1);
+    grainNumberSlider.setValue(1);
+    grainNumberSlider.setTitle("Number of grains");
+    
     
     addAndMakeVisible (panningRandomizeSlider);
     panningRandomizeSlider.setRange (0, 0.5, 0.01);
     panningRandomizeSlider.setValue(0);
     panningRandomizeSlider.setTitle("Panning Randomize");
     
+    addAndMakeVisible (panningSlider);
+    panningSlider.setRange (0, 1, 0.01);
+    panningSlider.setValue(0.5);
+    panningSlider.setTitle("Panning Position");
+    //panningSlider.onValueChange = [this] {pannings = panningSlider.getValue();};
     
+
 
     setSize (1200, 1200);
 
@@ -226,20 +233,19 @@ void MainComponent::resized()
 {
     int margin = 40;
     int leftMargin = 10;
-    openButton .setBounds (leftMargin, 10, getWidth() - 20, 20);
+    openButton.setBounds (leftMargin, 10, getWidth() - 20, 20);
     clearButton.setBounds (leftMargin, margin+10, getWidth() - 20, 20);
     visualizeButton.setBounds (leftMargin, margin*2+10, getWidth() - 20, 20);
     
     grainPositionSlider.setBounds (leftMargin, margin*3+10, getWidth() - leftMargin - 10, 20);
     grainLengthSlider.setBounds (leftMargin, margin*4+10, getWidth() - leftMargin - 10, 20);
-    
-    panningRandomizeSlider.setBounds (leftMargin, margin*5+10, getWidth() - 20, 20);
-    panningSlider.setBounds (leftMargin, margin*6+10, getWidth(), 20);
+    grainNumberSlider.setBounds (leftMargin, margin*5+10, getWidth() - leftMargin - 10, 20);
+    panningRandomizeSlider.setBounds (leftMargin, margin*6+10, getWidth() - 20, 20);
+    panningSlider.setBounds (leftMargin, margin*7+10, getWidth() - 20, 20);
     
     if (oscilloscope2D != nullptr)
         oscilloscope2D->setBounds (10, 450, getWidth() - 20, getHeight()-50);
     
-
 }
 
 
