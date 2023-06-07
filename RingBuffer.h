@@ -62,6 +62,8 @@ public:
             {
                 int samplesToEdgeOfBuffer = bufferSize - curWritePosition;
                 
+                // void copyFrom (int destChannel, int destStartSample, const AudioBuffer &source, int sourceChannel,
+                //                int sourceStartSample, int numSamples) noexcept : Copies samples from another buffer to this one
                 audioBuffer->copyFrom (i, curWritePosition, newAudioData, i,
                                        startSample, samplesToEdgeOfBuffer);
                 
