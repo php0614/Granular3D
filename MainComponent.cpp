@@ -105,24 +105,22 @@ MainComponent::MainComponent()
     juce::File pathToMyExecutable = juce::File::getSpecialLocation (juce::File::SpecialLocationType::currentExecutableFile);
     auto Newpath = pathToMyExecutable.getParentDirectory().getParentDirectory().getFullPathName();
     juce::File initFile(Newpath+"/"+"ASMR_Voice.wav");
-    juce::File initFile2(Newpath+"/"+"ASMR_Voice2.wav");
+    //juce::File initFile2(Newpath+"/"+"ASMR_Voice2.wav");
     std::cout<<Newpath<<std::endl;
 
     
     std::unique_ptr<juce::AudioFormatReader> reader (formatManager.createReaderFor (initFile)); //첫번째 음원
-    std::unique_ptr<juce::AudioFormatReader> reader2 (formatManager.createReaderFor (initFile2)); //두번쨰 음원
+    //std::unique_ptr<juce::AudioFormatReader> reader2 (formatManager.createReaderFor (initFile2)); //두번쨰 음원
 
-    if (reader.get() != nullptr && reader2.get() != nullptr)
+    if (reader.get() != nullptr)
     {
         // 각 음원 파일의 길이를 가져옵니다.
         auto duration = (float) reader->lengthInSamples / reader->sampleRate;
-        auto duration2 = (float) reader2->lengthInSamples / reader2->sampleRate;
 
-        if (duration < 10 && duration2 < 10)
+        if (duration < 10)
         {
             //각 음원 파일에 대한 버퍼를 생성합니다.
             fileBuffer.setSize ((int) reader->numChannels, (int) reader->lengthInSamples);
-            fileBuffer2.setSize ((int) reader2->numChannels, (int) reader2->lengthInSamples);
             
             reader->read (&fileBuffer,
                           0,
@@ -130,20 +128,11 @@ MainComponent::MainComponent()
                           0,
                           true,
                           true);
-            
-            reader2->read (&fileBuffer,
-                          0,
-                          (int) reader2->lengthInSamples,
-                          0,
-                          true,
-                          true);
+
             
             // 첫번째 음원 파일에 대한 처리
             position = startPosition; // 음원파일에 대한 시작위치
             setAudioChannels (0, (int) reader->numChannels); // 음원 파일에 대한 오디오 채널을 설정
-            // 두번째 음원 파일에 대한 처리
-            position2 = startPosition2;
-            setAudioChannels (0, (int) reader2->numChannels);
         }
         else
         {
@@ -165,8 +154,8 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
     
     //std::this_thread::sleep_for(std::chrono::milliseconds(100*newGrainNumber)); // 이건 그냥 딜레이...
     
-    auto numInputChannels = bufferToFill.buffer->getNumChannels();
-    auto numOutputChannels = bufferToFill.buffer->getNumChannels(); // 2
+    auto numInputChannels = bufferToFill.buffer -> getNumChannels();
+    auto numOutputChannels = bufferToFill.buffer -> getNumChannels(); // 2
     
     //auto numInputChannels2 = bufferToFill2.buffer->getNumChannels();
     //auto numOutputChannels2 = bufferToFill2.buffer->getNumChannels();
@@ -185,7 +174,7 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
     
     while (outputSamplesRemaining > 0)
     {
-        auto bufferSamplesRemaining = bufferToFill.buffer->getNumSamples() - position;                // [10]
+        auto bufferSamplesRemaining = fileBuffer.getNumSamples() - position;                // [10]
         
         //아웃풋 버퍼(일정한 사이즈) 와 플레이 버퍼의 남은 길이(일정하지 않음. 예를 들면 버퍼가 2초짜리라면 맨 처음엔 2초 분량의 버퍼가 남지만, 끝으로 갈수록 남은-플레이해야할-버퍼가 줄어듬. 마지막엔 아웃풋 버퍼의 크기에 딱 떨어지지 않을 수 있음) 를 비교해서 작은 것을 아웃풋
         //예를 들면 아웃풋 버퍼가 100이고 플레이 해야할 샘플이 22567이라면, 맨 끝에는 67샘플이 남을 것임.
@@ -355,7 +344,15 @@ void MainComponent::releaseResources()
        delete oscilloscope2D;
     }
     
+    if (oscilloscope2D2 != nullptr)
+    {
+       oscilloscope2D2->stop();
+       removeChildComponent (oscilloscope2D2);
+       delete oscilloscope2D2;
+    }
+    
     delete ringBuffer;
+    delete ringBuffer2;
 }
 
 void MainComponent::resized()
@@ -420,10 +417,10 @@ void MainComponent::paint (juce::Graphics& g)
     float b = pannings2;
     g.fillAll(juce::Colours::black);
     g.setColour(juce::Colours::orange);
-    g.fillEllipse(getWidth() * a, getHeight() * 0.42, 40, 40);
+    g.fillEllipse(getWidth() * a, getHeight() * 0.40, 40, 40);
     
     g.setColour(juce::Colours::green);
-    g.fillEllipse(getWidth() * b, getHeight() * 0.64, 40, 40);
+    g.fillEllipse(getWidth() * b, getHeight() * 0.45, 40, 40);
 }
 
 void MainComponent::mouseMove (const juce::MouseEvent& event)
@@ -550,25 +547,25 @@ void MainComponent::openButtonClicked2()
 
 void MainComponent::clearButtonClicked2()
 {
-    shutdownAudio();
-    
-    if (oscilloscope2D2 != nullptr)
-    {
-       oscilloscope2D2->stop();
-       removeChildComponent (oscilloscope2D2);
-       delete oscilloscope2D2;
-    }
+//    shutdownAudio();
+//
+//    if (oscilloscope2D2 != nullptr)
+//    {
+//       oscilloscope2D2->stop();
+//       removeChildComponent (oscilloscope2D2);
+//       delete oscilloscope2D2;
+//    }
     
 }
 
 void MainComponent::visualizeButtonClicked2()
 {
-    oscilloscope2D2->start();
-
-    oscilloscope2D2->setVisible(true);
-    
-    if (oscilloscope2D2 != nullptr)
-        oscilloscope2D2->setBounds (10, 400, getWidth()/2, getHeight()/2);
+//    oscilloscope2D2->start();
+//
+//    oscilloscope2D2->setVisible(true);
+//
+//    if (oscilloscope2D2 != nullptr)
+//        oscilloscope2D2->setBounds (10, 400, getWidth()/2, getHeight()/2);
 }
 
 double MainComponent::generateHannWindow(int size, int pos)
