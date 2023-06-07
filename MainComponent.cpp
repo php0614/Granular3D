@@ -105,12 +105,12 @@ MainComponent::MainComponent()
     juce::File pathToMyExecutable = juce::File::getSpecialLocation (juce::File::SpecialLocationType::currentExecutableFile);
     auto Newpath = pathToMyExecutable.getParentDirectory().getParentDirectory().getFullPathName();
     juce::File initFile(Newpath+"/"+"ASMR_Voice.wav");
-    //juce::File initFile2(Newpath+"/"+"ASMR_Voice2.wav");
+    juce::File initFile2(Newpath+"/"+"ASMR_Voice.wav");
     std::cout<<Newpath<<std::endl;
 
     
     std::unique_ptr<juce::AudioFormatReader> reader (formatManager.createReaderFor (initFile)); //첫번째 음원
-    //std::unique_ptr<juce::AudioFormatReader> reader2 (formatManager.createReaderFor (initFile2)); //두번쨰 음원
+    std::unique_ptr<juce::AudioFormatReader> reader2 (formatManager.createReaderFor (initFile2)); //두번쨰 음원
 
     if (reader.get() != nullptr)
     {
@@ -139,6 +139,33 @@ MainComponent::MainComponent()
             // handle the error that the file is 10 seconds or longer..
         }
     }
+    if (reader2.get() != nullptr)
+    {
+        // 각 음원 파일의 길이를 가져옵니다.
+        auto duration2 = (float) reader2->lengthInSamples / reader2->sampleRate;
+
+        if (duration2 < 10)
+        {
+            //각 음원 파일에 대한 버퍼를 생성합니다.
+            fileBuffer2.setSize ((int) reader2->numChannels, (int) reader2->lengthInSamples);
+            
+            reader2->read (&fileBuffer2,
+                          0,
+                          (int) reader2->lengthInSamples, // 350497 (yonghyun's violin.wav)
+                          0,
+                          true,
+                          true);
+
+            
+            // 첫번째 음원 파일에 대한 처리
+            position2 = startPosition2; // 음원파일에 대한 시작위치
+            setAudioChannels (1, (int) reader2->numChannels); // 음원 파일에 대한 오디오 채널을 설정
+        }
+        else
+        {
+            // handle the error that the file is 10 seconds or longer..
+        }
+    }
 }
 
 MainComponent::~MainComponent()
@@ -157,9 +184,6 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
     auto numInputChannels = bufferToFill.buffer -> getNumChannels();
     auto numOutputChannels = bufferToFill.buffer -> getNumChannels(); // 2
     
-    //auto numInputChannels2 = bufferToFill2.buffer->getNumChannels();
-    //auto numOutputChannels2 = bufferToFill2.buffer->getNumChannels();
-    
     //아웃풋 버퍼의 크기를 outputSamplesRemaining에 담음
     auto outputSamplesRemaining = bufferToFill.numSamples;                                  // [8]
     //auto outputSamplesRemaining2 = bufferToFill2.numSamples;
@@ -174,7 +198,8 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
     
     while (outputSamplesRemaining > 0)
     {
-        auto bufferSamplesRemaining = fileBuffer.getNumSamples() - position;                // [10]
+        //auto bufferSamplesRemaining = bufferToFill.buffer -> getNumSamples() - position;                // [10]
+        auto bufferSamplesRemaining = fileBuffer.getNumSamples() - position;
         
         //아웃풋 버퍼(일정한 사이즈) 와 플레이 버퍼의 남은 길이(일정하지 않음. 예를 들면 버퍼가 2초짜리라면 맨 처음엔 2초 분량의 버퍼가 남지만, 끝으로 갈수록 남은-플레이해야할-버퍼가 줄어듬. 마지막엔 아웃풋 버퍼의 크기에 딱 떨어지지 않을 수 있음) 를 비교해서 작은 것을 아웃풋
         //예를 들면 아웃풋 버퍼가 100이고 플레이 해야할 샘플이 22567이라면, 맨 끝에는 67샘플이 남을 것임.
@@ -200,6 +225,7 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                                            channel % numInputChannels,
                                            position,
                                            samplesThisTime);
+            
             //std::cout<<position<<std::endl;
             //processBuffer를 아웃풋으로 만드는 부분(getWritePointer)
             auto processBuffer = bufferToFill.buffer->getWritePointer(channel);
@@ -505,13 +531,13 @@ void MainComponent::openButtonClicked2()
 {
     shutdownAudio();
 
-    chooser = std::make_unique<juce::FileChooser> ("Select a Wave file shorter than 2 seconds to play...",
+    chooser2 = std::make_unique<juce::FileChooser> ("Select a Wave file shorter than 2 seconds to play...",
                                                    juce::File{},
                                                    "*.wav");
     auto chooserFlags = juce::FileBrowserComponent::openMode
                       | juce::FileBrowserComponent::canSelectFiles;
 
-    chooser->launchAsync (chooserFlags, [this] (const juce::FileChooser& fc)
+    chooser2->launchAsync (chooserFlags, [this] (const juce::FileChooser& fc)
     {
         auto file = fc.getResult();
 
@@ -523,11 +549,15 @@ void MainComponent::openButtonClicked2()
         if (reader2.get() != nullptr)
         {
             auto duration = (float) reader2->lengthInSamples / reader2->sampleRate;
-
+            std::cout << "reader2->lengthInSamples: " << reader2->lengthInSamples; // 360497
+            std::cout << "reader2->sampleRate: " << reader2->sampleRate; // 44100
+            std::cout << "reader2->numChannels: " << reader2->numChannels << std::endl; // 2
+            
+            
             if (duration < 10)
             {
                 fileBuffer2.setSize ((int) reader2->numChannels, (int) reader2->lengthInSamples);
-                reader2->read(&fileBuffer,
+                reader2->read(&fileBuffer2,
                               0,
                               (int) reader2->lengthInSamples,
                               0,

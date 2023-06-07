@@ -114,11 +114,11 @@ private:
     int windowSize2 = 0;
     float currentGrainPan2 = 0.5;
     
-    
     float mouseX = 0;
     float mouseY = 0;
     
     std::unique_ptr<juce::FileChooser> chooser;
+    std::unique_ptr<juce::FileChooser> chooser2;
 
     RingBuffer<float> * ringBuffer;
     juce::AudioFormatManager formatManager;
