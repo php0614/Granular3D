@@ -8,10 +8,15 @@ MainComponent::MainComponent()
     addAndMakeVisible (openButton); // "Adds" a child component to this one, and also makes the child "visible" if it isn't already.
     openButton.setButtonText ("Open Source 1");
     openButton.onClick = [this] { openButtonClicked(); };
+    
+    // 1: buttonColourid, 2: buttonOnColourid, 3: textColourOffid, 4: textColourOnid
+    //openButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::bisque);
+    //openButton.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::lightcoral);
 
     addAndMakeVisible (clearButton);
     clearButton.setButtonText ("Clear Source 1");
     clearButton.onClick = [this] { clearButtonClicked(); };
+    // 1: buttonColourid, 2: buttonOnColourid, 3: textColourOffid, 4: textColourOnid
     
     addAndMakeVisible (visualizeButton);
     visualizeButton.setButtonText ("Visualize Source 1");
@@ -25,6 +30,10 @@ MainComponent::MainComponent()
     addAndMakeVisible (grainPositionLabel);
     grainPositionLabel.setText ("Grain Pos", juce::dontSendNotification);
     grainPositionLabel.attachToComponent (&grainPositionSlider, true);
+    grainPositionLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::grey);
+    grainPositionSlider.setColour(juce::Slider::ColourIds::textBoxBackgroundColourId, juce::Colours::grey);
+    grainPositionSlider.setColour(juce::Slider::ColourIds::trackColourId,juce::Colour::fromHSV(0.13f, 0.88f, 0.96f, 1.0f));
+    grainPositionSlider.setColour(juce::Slider::ColourIds::thumbColourId ,juce::Colour::fromHSV(0.13f, 0.88f, 0.90f, 1.0f));
     
     addAndMakeVisible (grainLengthSlider);
     grainLengthSlider.setRange (10, 8192, 1);
@@ -34,6 +43,10 @@ MainComponent::MainComponent()
     addAndMakeVisible (grainLengthLabel);
     grainLengthLabel.setText ("Grain Len", juce::dontSendNotification);
     grainLengthLabel.attachToComponent (&grainLengthSlider, true);
+    grainLengthLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::grey);
+    grainLengthSlider.setColour(juce::Slider::ColourIds::textBoxBackgroundColourId, juce::Colours::grey);
+    grainLengthSlider.setColour(juce::Slider::ColourIds::trackColourId,juce::Colour::fromHSV(0.13f, 0.88f, 0.96f, 1.0f));
+    grainLengthSlider.setColour(juce::Slider::ColourIds::thumbColourId ,juce::Colour::fromHSV(0.13f, 0.88f, 0.90f, 1.0f));
     
     addAndMakeVisible(grainNumberSlider);
     grainNumberSlider.setRange (0, 100, 1);
@@ -42,24 +55,36 @@ MainComponent::MainComponent()
     grainNumberSlider.setTextValueSuffix(" %");
     grainNumberSlider.onValueChange = [this] { newGrainNumber = grainNumberSlider.getValue();};
     addAndMakeVisible (grainNumberLabel);
-    grainNumberLabel.setText ("Grain Freq", juce::dontSendNotification);
+    grainNumberLabel.setText ("Grain Frq", juce::dontSendNotification);
     grainNumberLabel.attachToComponent (&grainNumberSlider, true);
+    grainNumberLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::grey);
+    grainNumberSlider.setColour(juce::Slider::ColourIds::textBoxBackgroundColourId, juce::Colours::grey);
+    grainNumberSlider.setColour(juce::Slider::ColourIds::trackColourId,juce::Colour::fromHSV(0.13f, 0.88f, 0.96f, 1.0f));
+    grainNumberSlider.setColour(juce::Slider::ColourIds::thumbColourId ,juce::Colour::fromHSV(0.13f, 0.88f, 0.90f, 1.0f));
 
     addAndMakeVisible (panningRandomizeSlider);
     panningRandomizeSlider.setRange (0, 0.5, 0.01);
     panningRandomizeSlider.setValue(0);
     panningRandomizeSlider.setTitle("Panning Randomize");
     addAndMakeVisible (panningRandomizeLabel);
-    panningRandomizeLabel.setText ("Panning Rand", juce::dontSendNotification);
+    panningRandomizeLabel.setText ("Pan Rand", juce::dontSendNotification);
     panningRandomizeLabel.attachToComponent (&panningRandomizeSlider, true);
+    panningRandomizeLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::grey);
+    panningRandomizeSlider.setColour(juce::Slider::ColourIds::textBoxBackgroundColourId, juce::Colours::grey);
+    panningRandomizeSlider.setColour(juce::Slider::ColourIds::trackColourId,juce::Colour::fromHSV(0.13f, 0.88f, 0.96f, 1.0f));
+    panningRandomizeSlider.setColour(juce::Slider::ColourIds::thumbColourId ,juce::Colour::fromHSV(0.13f, 0.88f, 0.90f, 1.0f));
     
     addAndMakeVisible (panningSlider);
     panningSlider.setRange (0, 1, 0.01);
     panningSlider.setValue(0.5);
     panningSlider.setTitle("Panning Position");
     addAndMakeVisible (panningLabel);
-    panningLabel.setText ("Panning Pos", juce::dontSendNotification);
+    panningLabel.setText ("Pan Pos", juce::dontSendNotification);
     panningLabel.attachToComponent (&panningSlider, true);
+    panningLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::grey);
+    panningSlider.setColour(juce::Slider::ColourIds::textBoxBackgroundColourId, juce::Colours::grey);
+    panningSlider.setColour(juce::Slider::ColourIds::trackColourId,juce::Colour::fromHSV(0.13f, 0.88f, 0.96f, 1.0f));
+    panningSlider.setColour(juce::Slider::ColourIds::thumbColourId ,juce::Colour::fromHSV(0.13f, 0.88f, 0.90f, 1.0f));
 
     setSize (1200, 1200);
 
@@ -367,11 +392,17 @@ void MainComponent::resized()
     int buttonHeight    = int(height*0.05);
     int buttonMargin    = int(height*0.065);
     
+    int labelLayoutX    = int(width*0.26);
+    int labelLayoutY    = buttonLayoutY;
+    int labelWidth      = int(width*0.09);
+    int labelHeight     = int(height*0.025);
+    int labelMargin     = int(height*0.04);
+    
     int sliderLayoutX   = int(width*0.35);
     int sliderLayoutY   = buttonLayoutY;
     int sliderWidth     = int(width*0.40);
-    int sliderHeight    = int(height*0.025);
-    int sliderMargin    = int(height*0.04);
+    int sliderHeight    = labelHeight;
+    int sliderMargin    = labelMargin;
     
     int oscil2DLayoutX  = int(width*0.77);
     int oscil2DLayoutY  = buttonLayoutY;
@@ -389,14 +420,29 @@ void MainComponent::resized()
     // 첫번째 음원용 슬라이더
     grainPositionSlider.setTopLeftPosition(sliderLayoutX,sliderLayoutY);
     grainPositionSlider.setSize(sliderWidth,sliderHeight);
+    grainPositionLabel.setTopLeftPosition(labelLayoutX, labelLayoutY);
+    grainPositionLabel.setSize(labelWidth, labelHeight);
+    grainPositionLabel.setJustificationType(juce::Justification::right);
     grainLengthSlider.setTopLeftPosition(sliderLayoutX,sliderLayoutY + sliderMargin);
     grainLengthSlider.setSize(sliderWidth,sliderHeight);
+    grainLengthLabel.setTopLeftPosition(labelLayoutX, labelLayoutY + labelMargin);
+    grainLengthLabel.setSize(labelWidth, labelHeight);
+    grainLengthLabel.setJustificationType(juce::Justification::right);
     grainNumberSlider.setTopLeftPosition(sliderLayoutX,sliderLayoutY + sliderMargin*2);
     grainNumberSlider.setSize(sliderWidth,sliderHeight);
+    grainNumberLabel.setTopLeftPosition(labelLayoutX, labelLayoutY + labelMargin*2);
+    grainNumberLabel.setSize(labelWidth, labelHeight);
+    grainNumberLabel.setJustificationType(juce::Justification::right);
     panningRandomizeSlider.setTopLeftPosition(sliderLayoutX, sliderLayoutY + sliderMargin*3);
     panningRandomizeSlider.setSize(sliderWidth,sliderHeight);
+    panningRandomizeLabel.setTopLeftPosition(labelLayoutX, labelLayoutY + labelMargin*3);
+    panningRandomizeLabel.setSize(labelWidth, labelHeight);
+    panningRandomizeLabel.setJustificationType(juce::Justification::right);
     panningSlider.setTopLeftPosition(sliderLayoutX, sliderLayoutY + sliderMargin*4);
     panningSlider.setSize(sliderWidth,sliderHeight);
+    panningLabel.setTopLeftPosition(labelLayoutX, labelLayoutY + labelMargin*4);
+    panningLabel.setSize(labelWidth, labelHeight);
+    panningLabel.setJustificationType(juce::Justification::right);
     
     if (oscilloscope2D != nullptr)
     {
@@ -423,7 +469,8 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
 
 void MainComponent::paint (juce::Graphics& g)
 {
-    g.fillAll(juce::Colours::black);
+    
+    g.fillAll(juce::Colour::fromHSV(0.13f, 0.02f, 0.99f, 1.0f));
     
     int num_ellipse = 3;
     
@@ -437,7 +484,6 @@ void MainComponent::paint (juce::Graphics& g)
         g.setColour(juce::Colour::fromHSV(0.13f+i*0.01, 0.88f-i*0.01, 0.96f-i*0.01, 1.0f));
         g.fillEllipse(getWidth() * pannings , getHeight() * (0.40 + i*0.05), 40, 40);
     }
-
 }
 
 void MainComponent::mouseMove (const juce::MouseEvent& event)
@@ -518,7 +564,7 @@ void MainComponent::visualizeButtonClicked()
     int oscil2DLayoutX  = int(width*0.77);
     int oscil2DLayoutY  = int(height*0.8);
     int oscil2DWidth    = int(width*0.2);
-    int oscil2DHeight   = int(height*0.15);
+    int oscil2DHeight   = int(height*0.18);
     
     oscilloscope2D->start();
 
