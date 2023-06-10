@@ -141,8 +141,7 @@ private:
     //juce::dsp::WindowingFunction<float> window();
     int iteration = 0;
     double pitchShiftRatio = 1.0;
-    
-    int gap = 1; // Grain의 출현 빈도를 결정함
+
     
    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

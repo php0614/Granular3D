@@ -30,9 +30,9 @@ MainComponent::MainComponent()
     grainLengthSlider.onValueChange = [this] { newGrainSize = grainLengthSlider.getValue();};
     
     addAndMakeVisible(grainNumberSlider);
-    grainNumberSlider.setRange (0, 512, 1);
-    grainNumberSlider.setValue(1);
-    grainNumberSlider.setTitle("Grain Number");
+    grainNumberSlider.setRange (0, 100, 1);
+    grainNumberSlider.setValue(100);
+    grainNumberSlider.setTitle("Grain Frequency (%)");
     grainNumberSlider.onValueChange = [this] { newGrainNumber = grainNumberSlider.getValue();};
 
     addAndMakeVisible (panningRandomizeSlider);
@@ -221,16 +221,9 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                                            position, // position to start reading from in the source buffer.
                                            samplesThisTime); // The number of samples to read that we calculated earlier.
             
-            //std::cout<<position<<std::endl;
             //processBuffer를 아웃풋으로 만드는 부분(getWritePointer)
             float* processBuffer = bufferToFill.buffer->getWritePointer(channel);
-            //  "processBuffer" is a juce::AudioBuffer object containing the audio samples you want to apply the window to, "channel" is the index of the audio channel you want to process (0 for the first channel).
-            
-            
-//            auto rb = new RubberBand::RubberBandStretcher(16000, 2);
-//            rb -> setMaxProcessSize(512);
-//            rb->process((const float* const*)fileBuffer.getArrayOfReadPointers(), fileBuffer.getNumSamples(), false);
-//            rb->retrieve((float *const *)fileBuffer.getArrayOfWritePointers(), fileBuffer.getNumSamples());
+
 
             if(channel == 0)
             {
@@ -245,13 +238,13 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                 
                 //processBuffer가 곧 아웃풋 (1 sample)
                 processBuffer[sample] *= generateHannWindow(windowSize, windowPosition);
-            
+                
                 // 다양한 Sound를 만들기 위해 시도하기 (1) 음원과 Knocking Sound가 함께 들림
 //                if (iteration % 10 == 0)
 //                {processBuffer[sample] = 0.1 * std::sin(2*juce::MathConstants<float>::pi*iteration/40);}
                 
-                // 다양한 Sound를 만들기 위해 시도하기 (2) 깜빡이 (gap을 키우면 Grain 출현 빈도를 늦추기)
-                //if (gap>0 && iteration % gap != 0 ){processBuffer[sample] = 0;}
+                // 다양한 Sound를 만들기 위해 시도하기 (2) 깜빡이 (newGrainNumber가 커지면 빈도수가 높아짐)
+                if (newGrainNumber == 0 || iteration % (100/newGrainNumber) != 0 ){processBuffer[sample] = 0;}
                 
                 // 다양한 Sound를 만들기 위해 시도하기 (3) 음원과 또다른 사운드가 함께 들림
 //                if (iteration % 2 == 0)
