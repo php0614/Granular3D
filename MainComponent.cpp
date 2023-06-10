@@ -1,10 +1,11 @@
 #include "MainComponent.h"
+#include "RubberBandStretcher.h"
 
 //==============================================================================
 MainComponent::MainComponent()
 {
     //첫번째 음원용
-    addAndMakeVisible (openButton);
+    addAndMakeVisible (openButton); // "Adds" a child component to this one, and also makes the child "visible" if it isn't already.
     openButton.setButtonText ("Open Source 1");
     openButton.onClick = [this] { openButtonClicked(); };
 
@@ -48,6 +49,7 @@ MainComponent::MainComponent()
     setSize (1200, 1200);
 
     formatManager.registerBasicFormats();
+    // formatManager: A class for keeping a list of available audio formats, and for deciding which one to use to open a given file. After creating an AudioFormatManager object, you should call registerFormat() or registerBasicFormats() to give it a list of format types that it can use.
     
     startPosition = 512;
     grainSize = 1024;
@@ -112,12 +114,12 @@ MainComponent::MainComponent()
     std::unique_ptr<juce::AudioFormatReader> reader (formatManager.createReaderFor (initFile)); //첫번째 음원
     std::unique_ptr<juce::AudioFormatReader> reader2 (formatManager.createReaderFor (initFile2)); //두번쨰 음원
 
-    if (reader.get() != nullptr)
+    if (reader.get() != nullptr) // 첫번째 음원이 존재한다면
     {
-        // 각 음원 파일의 길이를 가져옵니다.
+        // 해당 음원 파일의 길이를 가져옵니다.
         auto duration = (float) reader->lengthInSamples / reader->sampleRate;
 
-        if (duration < 10)
+        if (duration < 10) // 만약 음원의 길이가 10초 미만이면
         {
             //각 음원 파일에 대한 버퍼를 생성합니다.
             fileBuffer.setSize ((int) reader->numChannels, (int) reader->lengthInSamples);
@@ -139,7 +141,7 @@ MainComponent::MainComponent()
             // handle the error that the file is 10 seconds or longer..
         }
     }
-    if (reader2.get() != nullptr)
+    if (reader2.get() != nullptr) // 두번째 음원이 존재한다면
     {
         // 각 음원 파일의 길이를 가져옵니다.
         auto duration2 = (float) reader2->lengthInSamples / reader2->sampleRate;
@@ -175,31 +177,24 @@ MainComponent::~MainComponent()
 }
 
 //==============================================================================
-
+// the appropriate number of samples is read from our fileBuffer AudioSampleBuffer member and written out the AudioSampleBuffer object in the AudioSourceChannelInfo struct.
 void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
 {
-    
-    //std::this_thread::sleep_for(std::chrono::milliseconds(100*newGrainNumber)); // 이건 그냥 딜레이...
+    iteration ++;
     
     auto numInputChannels = bufferToFill.buffer -> getNumChannels();
     auto numOutputChannels = bufferToFill.buffer -> getNumChannels(); // 2
     
-    //아웃풋 버퍼의 크기를 outputSamplesRemaining에 담음
+    // stores the total number of samples
     auto outputSamplesRemaining = bufferToFill.numSamples;                                  // [8]
-    //auto outputSamplesRemaining2 = bufferToFill2.numSamples;
     //std::cout << "bufferToFill.numSamples: " << bufferToFill.numSamples; // 512
-    //auto outputSamplesRemaining = newGrainNumber;
     
     auto outputSamplesOffset = bufferToFill.startSample;                                    // [9]
-    //auto outputSamplesOffset2 = bufferToFill2.startSample;
     //std::cout << "bufferToFill.startSample: " << bufferToFill.startSample; Always 0
-    
-    //position = startPosition;
     
     while (outputSamplesRemaining > 0)
     {
-        //auto bufferSamplesRemaining = bufferToFill.buffer -> getNumSamples() - position;                // [10]
-        auto bufferSamplesRemaining = fileBuffer.getNumSamples() - position;
+        auto bufferSamplesRemaining = fileBuffer.getNumSamples() - position; // [10] calculate how many samples are left in the buffer from which we are reading.
         
         //아웃풋 버퍼(일정한 사이즈) 와 플레이 버퍼의 남은 길이(일정하지 않음. 예를 들면 버퍼가 2초짜리라면 맨 처음엔 2초 분량의 버퍼가 남지만, 끝으로 갈수록 남은-플레이해야할-버퍼가 줄어듬. 마지막엔 아웃풋 버퍼의 크기에 딱 떨어지지 않을 수 있음) 를 비교해서 작은 것을 아웃풋
         //예를 들면 아웃풋 버퍼가 100이고 플레이 해야할 샘플이 22567이라면, 맨 끝에는 67샘플이 남을 것임.
@@ -218,18 +213,25 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
              )
              */
             
-            //아웃풋 버퍼를 fileBuffer로 부터 일정 부분 가져와서 채움
-            bufferToFill.buffer->copyFrom (channel,
-                                           outputSamplesOffset,
-                                           fileBuffer,
-                                           channel % numInputChannels,
-                                           position,
-                                           samplesThisTime);
+            //  For each output channel we use the AudioSampleBuffer::copyFrom() function to copy sections of data from one channel of one buffer to a channel of another buffer. 아웃풋 버퍼를 fileBuffer로 부터 일정 부분 가져와서 채움
+            bufferToFill.buffer->copyFrom (channel, // Destination Channel index
+                                           outputSamplesOffset, // Sample offset within the destination buffer.
+                                           fileBuffer, // Source AudioSampleBuffer object from which to copy.
+                                           channel % numInputChannels, // Channel index of the source buffer
+                                           position, // position to start reading from in the source buffer.
+                                           samplesThisTime); // The number of samples to read that we calculated earlier.
             
             //std::cout<<position<<std::endl;
             //processBuffer를 아웃풋으로 만드는 부분(getWritePointer)
-            auto processBuffer = bufferToFill.buffer->getWritePointer(channel);
+            float* processBuffer = bufferToFill.buffer->getWritePointer(channel);
+            //  "processBuffer" is a juce::AudioBuffer object containing the audio samples you want to apply the window to, "channel" is the index of the audio channel you want to process (0 for the first channel).
             
+            
+//            auto rb = new RubberBand::RubberBandStretcher(16000, 2);
+//            rb -> setMaxProcessSize(512);
+//            rb->process((const float* const*)fileBuffer.getArrayOfReadPointers(), fileBuffer.getNumSamples(), false);
+//            rb->retrieve((float *const *)fileBuffer.getArrayOfWritePointers(), fileBuffer.getNumSamples());
+
             if(channel == 0)
             {
                 // Write to Ring Buffer: Do it only when Channel 0
@@ -241,12 +243,21 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                 //windowPosition은 position(전체 버퍼 재생에 쓰이는 위치 정보)와 다름. position을 그대로 윈도우의 위치를 가져오는데 쓰면, 윈도우가 갑자기 중간에서 0으로 뛰어버리는 일이 일어나 오디오 퀄리티가 안좋아짐
                 //따라서 따로 windowPosition을 써서 별도로 진행되게 해야함
                 
-                //processBuffer가 곧 아웃풋
+                //processBuffer가 곧 아웃풋 (1 sample)
                 processBuffer[sample] *= generateHannWindow(windowSize, windowPosition);
+            
+                // 다양한 Sound를 만들기 위해 시도하기 (1) 음원과 Knocking Sound가 함께 들림
+//                if (iteration % 10 == 0)
+//                {processBuffer[sample] = 0.1 * std::sin(2*juce::MathConstants<float>::pi*iteration/40);}
                 
-                if(channel == 0)
+                // 다양한 Sound를 만들기 위해 시도하기 (2) 깜빡이 (gap을 키우면 Grain 출현 빈도를 늦추기)
+                //if (gap>0 && iteration % gap != 0 ){processBuffer[sample] = 0;}
+                
+                
+                // 스테레오 패닝 (왼쪽 오른쪽의 비율 조정)
+                if(channel == 0) // 왼쪽
                     processBuffer[sample] *= (1-currentGrainPan);
-                if(channel == 1)
+                if(channel == 1) // 오른쪽
                     processBuffer[sample] *= currentGrainPan;
                 
                 if(channel == 0)
@@ -271,10 +282,16 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                         windowPosition = (windowPosition+1) % grainSize;
                 }
             }
+            
+// Another way to Multiply the Windowing Function
+//            juce::dsp::WindowingFunction<float> window(samplesThisTime, juce::dsp::WindowingFunction<float>::hamming);
+//            window.multiplyWithWindowingTable(processBuffer, samplesThisTime);
+            
         }
+            
         
-        outputSamplesRemaining -= samplesThisTime;
-        outputSamplesOffset += samplesThisTime;
+        outputSamplesRemaining -= samplesThisTime; // deduct the number of samples we just processed from the outputSamplesRemaining variable.
+        outputSamplesOffset += samplesThisTime; // Increment the outputSamplesOffset by the same amount in case we have another pass of the while() loop.
         
         //포지션이 그레인의 사이즈+시작위치를 넘어서면, 버퍼를 비우고 position을 초기(startPosition)으로 돌리며, WindowPosition또한 0으로 돌림
         //그렇지 않으면 position을 앞으로 진전시킴(다음 블록을 위한 position 계산후 변수 저장
@@ -285,83 +302,15 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
             windowPosition = 0;
         }
         else
-            position = position+samplesThisTime;
+            position = position+samplesThisTime; // Offset our position member
     }
-    
-    /*
-    while (outputSamplesRemaining2 > 0)
-    {
-        auto bufferSamplesRemaining2 = bufferToFill2.buffer->getNumSamples() - position;
-        auto samplesThisTime2 = juce::jmin (outputSamplesRemaining2, bufferSamplesRemaining2);
-        
-        for (auto channel = 0; channel < numOutputChannels2; ++channel)
-        {
-            //아웃풋 버퍼를 fileBuffer로 부터 일정 부분 가져와서 채움
-            bufferToFill2.buffer->copyFrom(channel,
-                                           outputSamplesOffset2,
-                                           fileBuffer2,
-                                           channel % numInputChannels2,
-                                           position2,
-                                           samplesThisTime2);
-            
-            auto processBuffer2 = bufferToFill2.buffer->getWritePointer(channel);
-            
-            if(channel == 0)
-                ringBuffer->writeSamples (*bufferToFill2.buffer, bufferToFill2.startSample, bufferToFill2.numSamples);
-    
-            for (int sample = 0; sample < bufferToFill2.numSamples; ++sample)
-            {
-                //processBuffer가 곧 아웃풋
-                processBuffer2[sample] *= generateHannWindow(windowSize2, windowPosition2);
-                
-                if(channel == 0)
-                    processBuffer2[sample] *= (1-currentGrainPan2);
-                if(channel == 1)
-                    processBuffer2[sample] *= currentGrainPan2;
-                
-                if(channel == 0)
-                {
-                    //부드럽게 window가 0위치일때 새로운 값 입력을 반영
-                    if(windowPosition2 == 0)
-                    {
-                        grainSize2 = newGrainSize2;
-                        startPosition2 = newStartPosition2;
-                        windowPosition2 = 1;
-                        
-                        if(bufferSamplesRemaining2 < grainSize2)
-                            windowSize2 = bufferSamplesRemaining2;
-                        else
-                            windowSize2 = grainSize2;
-                        
-                        currentGrainPan2 = pannings2;
-                    }
-                    else
-                        windowPosition2 = (windowPosition2+1) % grainSize2;
-                }
-            }
-        }
-        
-        outputSamplesRemaining2 -= samplesThisTime2;
-        outputSamplesOffset2 += samplesThisTime2;
-        
-        //포지션이 그레인의 사이즈+시작위치를 넘어서면, 버퍼를 비우고 position을 초기(startPosition)으로 돌리며, WindowPosition또한 0으로 돌림
-        //그렇지 않으면 position을 앞으로 진전시킴(다음 블록을 위한 position 계산후 변수 저장
-        if (position2 >= (grainSize2+startPosition2))
-        {
-            bufferToFill2.buffer->clear();
-            position2 = startPosition2;
-            windowPosition2 = 0;
-        }
-        else
-            position2 = position2+samplesThisTime2;
-    }
-     */
+ 
 }
 
 void MainComponent::releaseResources()
 {
     fileBuffer.setSize (0, 0);
-    fileBuffer2.setSize (0, 0);
+    //fileBuffer2.setSize (0, 0);
     
     if (oscilloscope2D != nullptr)
     {
@@ -370,15 +319,15 @@ void MainComponent::releaseResources()
        delete oscilloscope2D;
     }
     
-    if (oscilloscope2D2 != nullptr)
-    {
-       oscilloscope2D2->stop();
-       removeChildComponent (oscilloscope2D2);
-       delete oscilloscope2D2;
-    }
+//    if (oscilloscope2D2 != nullptr)
+//    {
+//       oscilloscope2D2->stop();
+//       removeChildComponent (oscilloscope2D2);
+//       delete oscilloscope2D2;
+//    }
     
     delete ringBuffer;
-    delete ringBuffer2;
+//    delete ringBuffer2;
 }
 
 void MainComponent::resized()
@@ -458,10 +407,10 @@ void MainComponent::mouseMove (const juce::MouseEvent& event)
 }
 
 //==============================================================================
-//첫번째 음원용
+//첫번째 음원용 - The whole file is then read into an AudioSampleBuffer member 'fileBuffer' in our MainContentComponent class.
 void MainComponent::openButtonClicked()
 {
-    shutdownAudio();
+    shutdownAudio(); // To avoid some of the multithreading issues.
 
     chooser = std::make_unique<juce::FileChooser> ("Select a Wave file shorter than 2 seconds to play...",
                                                    juce::File{},
@@ -476,6 +425,7 @@ void MainComponent::openButtonClicked()
         if (file == juce::File{})
             return;
 
+        // We create the AudioFormatReader object using the AudioFormatManager object. Notice that we store this in a std::unique_ptr object as we need to manage this object ourselves.
         std::unique_ptr<juce::AudioFormatReader> reader (formatManager.createReaderFor (file));
 
         if (reader.get() != nullptr)
@@ -484,15 +434,18 @@ void MainComponent::openButtonClicked()
 
             if (duration < 10)
             {
-                fileBuffer.setSize ((int) reader->numChannels, (int) reader->lengthInSamples);
+                fileBuffer.setSize ((int) reader->numChannels, (int) reader->lengthInSamples); // we resize the AudioSampleBuffer object by calling the AudioSampleBuffer::setSize() function using the number of channels and length from the AudioFormatReader object.
+                
+                // This reads the audio data from the AudioFormatReader object into our AudioSampleBuffer fileBuffer member using the AudioFormatReader::read() function.
                 reader->read (&fileBuffer,
-                              0,
-                              (int) reader->lengthInSamples,
-                              0,
-                              true,
-                              true);
-                position = startPosition;
-                setAudioChannels (0, (int) reader->numChannels);
+                              0, // The destination start sample in the AudioSampleBuffer object where the data will start to be written.
+                              (int) reader->lengthInSamples, // The number of samples to read.
+                              0, // The start samples in the AudioFormatReader object where reading will start.
+                              true, // For stereo (or other two-channel) files this flag indicates whether to read the "left" channel.
+                              true); // For stereo files this flag indicates whether to read the "right" channel.
+                
+                position = startPosition; // We need to store the most recent read position within our buffer as we play it. (1024)
+                setAudioChannels (0, (int) reader->numChannels); // This starts the audio system back up again. Here we have an opportunity to use the number of channels in the sound file to try and configure our audio device with the same number of channels.
             }
             else
             {

@@ -15,18 +15,18 @@ public:
     //==============================================================================
     Application() = default;
 
-    const juce::String getApplicationName() override       { return "LoopingAudioSampleBufferTutorial"; }
+    const juce::String getApplicationName() override       { return "[GCT535] Granular3DAudio"; }
     const juce::String getApplicationVersion() override    { return "1.0.0"; }
 
     void initialise (const juce::String&) override
     {
-        mainWindow.reset (new MainWindow ("LoopingAudioSampleBufferTutorial", new MainComponent, *this));
+        mainWindow.reset (new MainWindow ("[GCT535] Granular3DAudio", new MainComponent, *this));
     }
 
     void shutdown() override                         { mainWindow = nullptr; }
 
 private:
-    class MainWindow    : public juce::DocumentWindow
+    class MainWindow    : public juce::DocumentWindow // A resizable window with a title bar and maximise, minimise and close buttons
     {
     public:
         MainWindow (const juce::String& name, juce::Component* c, JUCEApplication& a)
@@ -66,3 +66,4 @@ private:
 
 //==============================================================================
 START_JUCE_APPLICATION (Application)
+// To start a JUCE app, use this macro: START_JUCE_APPLICATION (AppSubClass) where AppSubClass is the name of a class derived from JUCEApplication or JUCEApplicationBase.

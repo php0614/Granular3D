@@ -17,6 +17,7 @@ END_JUCE_PIP_METADATA
 #include <JuceHeader.h>
 #include "Oscilloscope2D.h"
 #include "RingBuffer.h"
+#include "RubberBandStretcher.h"
 
 #pragma once
 
@@ -28,11 +29,14 @@ public:
     
     ~MainComponent() override;
 
-    void prepareToPlay (int, double) override;
-
-    void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill) override;
-
-    void releaseResources() override;
+    
+    // prepareToPlay, getNextAudioBlock, releaseResources는 juce::AudioAppComponent의 pure virtual functions이다.
+    void prepareToPlay (int, double) override; // 오디오 진행 시작전에 호출된다.
+    
+    void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill) override; // 오디오 데이터의 새 블럭이 오디오 하드웨어가 필요할때마다 호출된다.
+    
+    void releaseResources() override; // 오디오 진행이 끝난 후 호출된다.
+    
 
     void resized() override;
     
@@ -122,7 +126,7 @@ private:
 
     RingBuffer<float> * ringBuffer;
     juce::AudioFormatManager formatManager;
-    juce::AudioSampleBuffer fileBuffer;
+    juce::AudioSampleBuffer fileBuffer; // AudioSampleBuffer -> Necessary for sampling applications that manipulate recorded audio data. (https://docs.juce.com/master/tutorial_looping_audio_sample_buffer.html)
     Oscilloscope2D * oscilloscope2D;
     
     RingBuffer<float> * ringBuffer2;
@@ -133,6 +137,12 @@ private:
     float currentRand;
     float currentRand2;
     juce::Random random;
-
+    
+    //juce::dsp::WindowingFunction<float> window();
+    int iteration = 0;
+    double pitchShiftRatio = 1.0;
+    
+    int gap = 1; // Grain의 출현 빈도를 결정함
+    
    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
