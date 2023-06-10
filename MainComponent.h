@@ -75,15 +75,17 @@ private:
     juce::TextButton openButton;
     juce::TextButton clearButton;
     juce::TextButton visualizeButton;
-    juce::Slider    grainPositionSlider;    // 첫번째 슬라이더: 불러온 오디오의 위치를 결정한다
-    juce::Slider    grainLengthSlider;      // 두번째 슬라이더: 불러올 오디오 그레인의 길이를 결정한다
-    juce::Slider    grainNumberSlider;      // 세번째 슬라이더: 불러온 그레인의 개수를 결정한다
-    juce::Slider    panningRandomizeSlider; // 네번째 슬라이더: 패닝의 랜덤성을 결정한다
-    juce::Slider    panningSlider;          // 다섯번째 슬라이더: 패닝의 위치를 결정한다
+    juce::Slider    grainNumberSlider;      // 첫번째 슬라이더: 그레인의 개수를 결정한다
+    juce::Slider    grainPositionSlider;    // 두번째 슬라이더: 불러온 오디오의 위치를 결정한다
+    juce::Slider    grainLengthSlider;      // 세번째 슬라이더: 불러올 오디오 그레인의 길이를 결정한다
+    juce::Slider    grainFrequencySlider;   // 네번째 슬라이더: 불러온 그레인의 개수를 결정한다
+    juce::Slider    panningRandomizeSlider; // 다섯번째 슬라이더: 패닝의 랜덤성을 결정한다
+    juce::Slider    panningSlider;          // 여섯번째 슬라이더: 패닝의 위치를 결정한다
     
-    juce::Label  grainPositionLabel; // 각 슬라이더에 대한 레이블링 적용
+    juce::Label  grainNumberLabel;          // 각 슬라이더에 대한 레이블링 적용
+    juce::Label  grainPositionLabel;
     juce::Label  grainLengthLabel;
-    juce::Label  grainNumberLabel;
+    juce::Label  grainFrequencyLabel;
     juce::Label  panningRandomizeLabel;
     juce::Label  panningLabel;
     
