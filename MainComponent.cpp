@@ -254,8 +254,19 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                 //if (gap>0 && iteration % gap != 0 ){processBuffer[sample] = 0;}
                 
                 // 다양한 Sound를 만들기 위해 시도하기 (3) 음원과 또다른 사운드가 함께 들림
-                if (iteration % 2 == 0)
-                {processBuffer[sample] = 0.1 * std::sin(2*juce::MathConstants<float>::pi*sample/130);} // 이 130 값을 낮추면 음이 높아지고 값을 높이면 음이 낮아짐
+//                if (iteration % 2 == 0)
+//                {processBuffer[sample] = 0.1 * std::sin(2*juce::MathConstants<float>::pi*sample/130);} // 이 130 값을 낮추면 음이 높아지고 값을 높이면 음이 낮아짐
+                
+                // 다양한 Sound를 만들기 위해 시도하기 (4) 음원과 또다른 사운드 2개까지 해서 3개가 번갈이 들림
+                if (iteration % 3 == 0)
+                {
+                    processBuffer[sample] = 0.1 * std::sin(2*juce::MathConstants<float>::pi*sample/130); //
+                    
+                }
+                else if (iteration % 3 == 1)
+                {
+                    processBuffer[sample] = 0.1 * std::sin(2*juce::MathConstants<float>::pi*sample/100);
+                }
                 
                 // 스테레오 패닝 (왼쪽 오른쪽의 비율 조정)
                 if(channel == 0) // 왼쪽
