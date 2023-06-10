@@ -65,6 +65,12 @@ private:
     
 
     //==========================================================================
+    
+    juce::TextButton header;
+    juce::TextButton visualize;
+    juce::TextButton footer;
+    juce::TextButton sidebar;
+    
     // 첫번째 음원용
     juce::TextButton openButton;
     juce::TextButton clearButton;
@@ -74,6 +80,12 @@ private:
     juce::Slider    grainNumberSlider;      // 세번째 슬라이더: 불러온 그레인의 개수를 결정한다
     juce::Slider    panningRandomizeSlider; // 네번째 슬라이더: 패닝의 랜덤성을 결정한다
     juce::Slider    panningSlider;          // 다섯번째 슬라이더: 패닝의 위치를 결정한다
+    
+    juce::Label  grainPositionLabel; // 각 슬라이더에 대한 레이블링 적용
+    juce::Label  grainLengthLabel;
+    juce::Label  grainNumberLabel;
+    juce::Label  panningRandomizeLabel;
+    juce::Label  panningLabel;
     
     // 두번째 음원용
     juce::TextButton openButton2;

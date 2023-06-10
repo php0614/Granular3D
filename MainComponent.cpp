@@ -22,29 +22,44 @@ MainComponent::MainComponent()
     grainPositionSlider.setValue(24745);
     grainPositionSlider.setTitle("Grain Position");
     grainPositionSlider.onValueChange = [this] {newStartPosition = grainPositionSlider.getValue();};
+    addAndMakeVisible (grainPositionLabel);
+    grainPositionLabel.setText ("Grain Pos", juce::dontSendNotification);
+    grainPositionLabel.attachToComponent (&grainPositionSlider, true);
     
     addAndMakeVisible (grainLengthSlider);
     grainLengthSlider.setRange (10, 8192, 1);
     grainLengthSlider.setValue(5070);
     grainLengthSlider.setTitle("Grain Length");
     grainLengthSlider.onValueChange = [this] { newGrainSize = grainLengthSlider.getValue();};
+    addAndMakeVisible (grainLengthLabel);
+    grainLengthLabel.setText ("Grain Len", juce::dontSendNotification);
+    grainLengthLabel.attachToComponent (&grainLengthSlider, true);
     
     addAndMakeVisible(grainNumberSlider);
     grainNumberSlider.setRange (0, 100, 1);
     grainNumberSlider.setValue(100);
-    grainNumberSlider.setTitle("Grain Frequency (%)");
+    grainNumberSlider.setTitle("Grain Frequency");
+    grainNumberSlider.setTextValueSuffix(" %");
     grainNumberSlider.onValueChange = [this] { newGrainNumber = grainNumberSlider.getValue();};
+    addAndMakeVisible (grainNumberLabel);
+    grainNumberLabel.setText ("Grain Freq", juce::dontSendNotification);
+    grainNumberLabel.attachToComponent (&grainNumberSlider, true);
 
     addAndMakeVisible (panningRandomizeSlider);
     panningRandomizeSlider.setRange (0, 0.5, 0.01);
     panningRandomizeSlider.setValue(0);
     panningRandomizeSlider.setTitle("Panning Randomize");
+    addAndMakeVisible (panningRandomizeLabel);
+    panningRandomizeLabel.setText ("Panning Rand", juce::dontSendNotification);
+    panningRandomizeLabel.attachToComponent (&panningRandomizeSlider, true);
     
     addAndMakeVisible (panningSlider);
     panningSlider.setRange (0, 1, 0.01);
     panningSlider.setValue(0.5);
     panningSlider.setTitle("Panning Position");
-    //panningSlider.onValueChange = [this] {pannings = panningSlider.getValue();};
+    addAndMakeVisible (panningLabel);
+    panningLabel.setText ("Panning Pos", juce::dontSendNotification);
+    panningLabel.attachToComponent (&panningSlider, true);
 
     setSize (1200, 1200);
 
@@ -328,7 +343,6 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
 void MainComponent::releaseResources()
 {
     fileBuffer.setSize (0, 0);
-    //fileBuffer2.setSize (0, 0);
     
     if (oscilloscope2D != nullptr)
     {
@@ -337,53 +351,58 @@ void MainComponent::releaseResources()
        delete oscilloscope2D;
     }
     
-//    if (oscilloscope2D2 != nullptr)
-//    {
-//       oscilloscope2D2->stop();
-//       removeChildComponent (oscilloscope2D2);
-//       delete oscilloscope2D2;
-//    }
-    
     delete ringBuffer;
-//    delete ringBuffer2;
 }
 
 void MainComponent::resized()
 {
-    int margin = 30;
-    int leftMargin = 10;
-    int rightMargin = int((getWidth()-20)/2) + leftMargin;
+    // Painting 방식을 화면의 비율로 모두 맞췄습니다. :)
+    
+    int width = getWidth();
+    int height = getHeight();
+
+    int buttonLayoutX   = int(width*0.01);
+    int buttonLayoutY   = int(height*0.8);
+    int buttonWidth     = int(width*0.25);
+    int buttonHeight    = int(height*0.05);
+    int buttonMargin    = int(height*0.065);
+    
+    int sliderLayoutX   = int(width*0.35);
+    int sliderLayoutY   = buttonLayoutY;
+    int sliderWidth     = int(width*0.40);
+    int sliderHeight    = int(height*0.025);
+    int sliderMargin    = int(height*0.04);
+    
+    int oscil2DLayoutX  = int(width*0.77);
+    int oscil2DLayoutY  = buttonLayoutY;
+    int oscil2DWidth    = int(width*0.2);
+    int oscil2DHeight   = int(height*0.15);
     
     // 첫번째 음원용 버튼
-    openButton.setBounds (leftMargin, 10, int((getWidth() - 20)/2), 20);
-    clearButton.setBounds (leftMargin, margin+10, int((getWidth() - 20)/2), 20);
-    visualizeButton.setBounds (leftMargin, margin*2+10, int((getWidth() - 20)/2), 20);
+    openButton.setTopLeftPosition (buttonLayoutX,buttonLayoutY);
+    openButton.setSize(buttonWidth, buttonHeight);
+    clearButton.setTopLeftPosition (buttonLayoutX,buttonLayoutY + buttonMargin);
+    clearButton.setSize(buttonWidth, buttonHeight);
+    visualizeButton.setTopLeftPosition (buttonLayoutX,buttonLayoutY + buttonMargin * 2);
+    visualizeButton.setSize(buttonWidth, buttonHeight);
    
     // 첫번째 음원용 슬라이더
-    grainPositionSlider.setBounds (leftMargin, margin*3+10, int((getWidth() - 20)/2), 20);
-    grainLengthSlider.setBounds (leftMargin, margin*4+10, int((getWidth() - 20)/2), 20);
-    grainNumberSlider.setBounds (leftMargin, margin*5+10, int((getWidth() - 20)/2), 20);
-    panningRandomizeSlider.setBounds (leftMargin, margin*6+10, int((getWidth() - 20)/2), 20);
-    panningSlider.setBounds (leftMargin, margin*7+10, int((getWidth() - 20)/2), 20);
+    grainPositionSlider.setTopLeftPosition(sliderLayoutX,sliderLayoutY);
+    grainPositionSlider.setSize(sliderWidth,sliderHeight);
+    grainLengthSlider.setTopLeftPosition(sliderLayoutX,sliderLayoutY + sliderMargin);
+    grainLengthSlider.setSize(sliderWidth,sliderHeight);
+    grainNumberSlider.setTopLeftPosition(sliderLayoutX,sliderLayoutY + sliderMargin*2);
+    grainNumberSlider.setSize(sliderWidth,sliderHeight);
+    panningRandomizeSlider.setTopLeftPosition(sliderLayoutX, sliderLayoutY + sliderMargin*3);
+    panningRandomizeSlider.setSize(sliderWidth,sliderHeight);
+    panningSlider.setTopLeftPosition(sliderLayoutX, sliderLayoutY + sliderMargin*4);
+    panningSlider.setSize(sliderWidth,sliderHeight);
     
     if (oscilloscope2D != nullptr)
-        oscilloscope2D->setBounds (10, 350, getWidth() - 20, getHeight()-50);
-    
-    if (oscilloscope2D2 != nullptr)
-        oscilloscope2D2->setBounds (10, 450, getWidth() - 20, getHeight()-50);
-    
-    // 두번째 음원용 버튼
-    openButton2.setBounds (rightMargin, 10, int((getWidth() - 20)/2), 20);
-    clearButton2.setBounds (rightMargin, margin+10, int((getWidth() - 20)/2), 20);
-    visualizeButton2.setBounds (rightMargin, margin*2+10, int((getWidth() - 20)/2), 20);
-    
-    // 두번째 음원용 슬라이더
-    grainPositionSlider2.setBounds (rightMargin, margin*3+10, int((getWidth() - 20)/2), 20);
-    grainLengthSlider2.setBounds (rightMargin, margin*4+10, int((getWidth() - 20)/2), 20);
-    grainNumberSlider2.setBounds (rightMargin, margin*5+10, int((getWidth() - 20)/2), 20);
-    panningRandomizeSlider2.setBounds (rightMargin, margin*6+10, int((getWidth() - 20)/2), 20);
-    panningSlider2.setBounds (rightMargin, margin*7+10, int((getWidth() - 20)/2), 20);
- 
+    {
+        oscilloscope2D->setTopLeftPosition(oscil2DLayoutX, oscil2DLayoutY);
+        oscilloscope2D->setSize(oscil2DWidth, oscil2DHeight);
+    }
 }
 
 
@@ -489,12 +508,22 @@ void MainComponent::clearButtonClicked()
 
 void MainComponent::visualizeButtonClicked()
 {
+    int width = getWidth();
+    int height = getHeight();
+    int oscil2DLayoutX  = int(width*0.77);
+    int oscil2DLayoutY  = int(height*0.8);
+    int oscil2DWidth    = int(width*0.2);
+    int oscil2DHeight   = int(height*0.15);
+    
     oscilloscope2D->start();
 
     oscilloscope2D->setVisible(true);
     
     if (oscilloscope2D != nullptr)
-        oscilloscope2D->setBounds (10, 400, getWidth()/2, getHeight()/2);
+    {
+        oscilloscope2D->setTopLeftPosition(oscil2DLayoutX, oscil2DLayoutY);
+        oscilloscope2D->setSize(oscil2DWidth, oscil2DHeight);
+    }
 }
 
 // 두번째 음원용
