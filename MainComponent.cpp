@@ -423,16 +423,21 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
 
 void MainComponent::paint (juce::Graphics& g)
 {
-    g.setColour (juce::Colours::sandybrown);
-    
-    float a = pannings;
-    float b = pannings2;
     g.fillAll(juce::Colours::black);
-    g.setColour(juce::Colours::orange);
-    g.fillEllipse(getWidth() * a, getHeight() * 0.40, 40, 40);
     
-    g.setColour(juce::Colours::green);
-    g.fillEllipse(getWidth() * b, getHeight() * 0.45, 40, 40);
+    int num_ellipse = 3;
+    
+    currentRand = (random.nextFloat() -0.5) * 2 * panningRandomizeSlider.getValue();
+    
+    for (int i=0; i<num_ellipse; i++)
+    {
+        currentRand = (random.nextFloat() -0.5) * 2 * panningRandomizeSlider.getValue();
+        pannings = panningSlider.getValue()+currentRand;
+        
+        g.setColour(juce::Colour::fromHSV(0.13f+i*0.01, 0.88f-i*0.01, 0.96f-i*0.01, 1.0f));
+        g.fillEllipse(getWidth() * pannings , getHeight() * (0.40 + i*0.05), 40, 40);
+    }
+
 }
 
 void MainComponent::mouseMove (const juce::MouseEvent& event)
@@ -606,10 +611,5 @@ double MainComponent::generateHannWindow(int size, int pos)
 
 void MainComponent::timerCallback()
 {
-    currentRand = (random.nextFloat() -0.5) * 2 * panningRandomizeSlider.getValue();
-    pannings = panningSlider.getValue()+currentRand;
-    
-    currentRand2 = (random.nextFloat() -0.5) * 2 * panningRandomizeSlider2.getValue();
-    pannings2 = panningSlider2.getValue()+currentRand2;
     repaint();
 }
