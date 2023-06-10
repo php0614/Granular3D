@@ -4,6 +4,11 @@
 //==============================================================================
 MainComponent::MainComponent()
 {
+    
+    addAndMakeVisible (grainVisualizeButton); // grain 가시화 On/Off
+    grainVisualizeButton.setButtonText ("VIS ON/OFF");
+    grainVisualizeButton.onClick = [this] { grainVisualizeButtonClicked(); };
+    
     //첫번째 음원용
     addAndMakeVisible (openButton); // "Adds" a child component to this one, and also makes the child "visible" if it isn't already.
     openButton.setButtonText ("Open Source 1");
@@ -446,6 +451,9 @@ void MainComponent::resized()
     int masterVolumeSliderWidth     = int(width*0.10);
     int masterVolumeSliderHeight    = int(height*0.20);
 
+    // Grain Visualize 버튼
+    grainVisualizeButton.setTopLeftPosition (buttonLayoutX, buttonLayoutY - buttonMargin);
+    grainVisualizeButton.setSize (width*0.1, buttonHeight);
     
     // 첫번째 음원용 버튼
     openButton.setTopLeftPosition (buttonLayoutX,buttonLayoutY);
@@ -520,19 +528,23 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
 void MainComponent::paint (juce::Graphics& g)
 {
     
-    g.fillAll(juce::Colour::fromHSV(0.13f, 0.02f, 0.99f, 1.0f));
+    g.fillAll(juce::Colour::fromHSV(0.13f, 0.02f, 0.99f, 1.0f)); // 배경화면
     
-    int num_ellipse = grainNumberSlider.getValue();
-    
-    currentRand = (random.nextFloat() -0.5) * 2 * panningRandomizeSlider.getValue();
-    
-    for (int i=0; i<num_ellipse; i++)
+    if (grainVisualize == true)
     {
-        currentRand = (random.nextFloat() -0.5) * 2 * panningRandomizeSlider.getValue();
-        pannings = panningSlider.getValue()*0.97+currentRand; // 0.97은 화면 밖에 튀어나오지 않게 임시방편
+    
+        int num_ellipse = grainNumberSlider.getValue();
         
-        g.setColour(juce::Colour::fromHSV(0.13f+i*0.01, 0.88f-i*0.01, 0.96f-i*0.01, 1.0f));
-        g.fillEllipse(getWidth() * pannings , getHeight() * (0.20 + i*0.05), 40, 40);
+        currentRand = (random.nextFloat() -0.5) * 2 * panningRandomizeSlider.getValue();
+        
+        for (int i=0; i<num_ellipse; i++)
+        {
+            currentRand = (random.nextFloat() -0.5) * 2 * panningRandomizeSlider.getValue();
+            pannings = panningSlider.getValue()*0.97+currentRand; // 0.97은 화면 밖에 튀어나오지 않게 임시방편
+            
+            g.setColour(juce::Colour::fromHSV(0.13f+i*0.01, 0.88f-i*0.01, 0.96f-i*0.01, 1.0f));
+            g.fillEllipse(getWidth() * pannings , getHeight() * (0.20 + i*0.05), 40, 40);
+        }
     }
 }
 

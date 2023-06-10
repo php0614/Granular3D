@@ -47,6 +47,11 @@ public:
     void mouseMove (const juce::MouseEvent& event);
 
 private:
+    
+    void grainVisualizeButtonClicked(){
+        grainVisualize = !grainVisualize;
+    }
+    
     // 첫번째 음원용
     void openButtonClicked();
 
@@ -66,10 +71,7 @@ private:
 
     //==========================================================================
     
-    juce::TextButton header;
-    juce::TextButton visualize;
-    juce::TextButton footer;
-    juce::TextButton sidebar;
+    juce::TextButton grainVisualizeButton; 
     
     // 첫번째 음원용
     juce::TextButton openButton;
@@ -157,8 +159,8 @@ private:
     
     //juce::dsp::WindowingFunction<float> window();
     int iteration = 0;
-    double pitchShiftRatio = 1.0;
 
+    bool grainVisualize = true;
     
    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
