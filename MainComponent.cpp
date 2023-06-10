@@ -253,6 +253,9 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                 // 다양한 Sound를 만들기 위해 시도하기 (2) 깜빡이 (gap을 키우면 Grain 출현 빈도를 늦추기)
                 //if (gap>0 && iteration % gap != 0 ){processBuffer[sample] = 0;}
                 
+                // 다양한 Sound를 만들기 위해 시도하기 (3) 음원과 또다른 사운드가 함께 들림
+                if (iteration % 2 == 0)
+                {processBuffer[sample] = 0.1 * std::sin(2*juce::MathConstants<float>::pi*sample/130);} // 이 130 값을 낮추면 음이 높아지고 값을 높이면 음이 낮아짐
                 
                 // 스테레오 패닝 (왼쪽 오른쪽의 비율 조정)
                 if(channel == 0) // 왼쪽
