@@ -18,6 +18,20 @@ MainComponent::MainComponent()
     visualizeButton.setButtonText ("Visualize Source 1");
     visualizeButton.onClick = [this] { visualizeButtonClicked(); };
     
+    addAndMakeVisible (masterVolumeSlider); // 마스터볼륨(게인) 슬라이더; Master Volume(Gain) Slider
+    masterVolumeSlider.setRange (0, 100, 1);
+    masterVolumeSlider.setValue(80);
+    masterVolumeSlider.setTitle("Master Volume");
+    masterVolumeSlider.onValueChange = [this] {newStartPosition = masterVolumeSlider.getValue();};
+    masterVolumeSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
+    addAndMakeVisible (masterVolumeLabel);
+    masterVolumeLabel.setText ("Master\nVolume", juce::dontSendNotification);
+    masterVolumeLabel.attachToComponent (&masterVolumeSlider, true);
+    masterVolumeLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::grey);
+    masterVolumeSlider.setColour(juce::Slider::ColourIds::textBoxBackgroundColourId, juce::Colours::grey);
+    masterVolumeSlider.setColour(juce::Slider::ColourIds::trackColourId,juce::Colour::fromHSV(0.13f, 0.88f, 0.96f, 1.0f));
+    masterVolumeSlider.setColour(juce::Slider::ColourIds::thumbColourId ,juce::Colour::fromHSV(0.13f, 0.88f, 0.90f, 1.0f));
+    
     addAndMakeVisible (grainNumberSlider);
     grainNumberSlider.setRange (0, 10, 1);
     grainNumberSlider.setValue(1);
@@ -232,6 +246,8 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
 {
     iteration ++;
     
+    int grain_number = grainNumberSlider.getValue();
+    
     auto numInputChannels = bufferToFill.buffer -> getNumChannels();
     auto numOutputChannels = bufferToFill.buffer -> getNumChannels(); // 2
     
@@ -312,15 +328,16 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
 //                }
                 
                 // 다양한 Sound를 만들기 위해 시도하기 (5) 기존 음원을 사인파에 올리기 - FM Synthesis..!?
-                if (iteration %3 == 0)
+                if (grain_number == 0)
+                    processBuffer[sample] *= 0;
+                else if (iteration % grain_number != 0)
                 {
-                    processBuffer[sample] *= std::sin(2*juce::MathConstants<float>::pi*sample/130);
-                }
-                if (iteration %3 == 1)
-                {
-                    processBuffer[sample] *= std::sin(2*juce::MathConstants<float>::pi*sample/80);
+                    processBuffer[sample] *= std::sin(2*juce::MathConstants<float>::pi*sample/(160 - (iteration % grain_number)*5));
+                    // 이 160 값이 음정을 조절함
                 }
                 
+                // 마스터 볼륨 조절
+                processBuffer[sample] *= (0.01 * masterVolumeSlider.getValue());
                 
                 // 스테레오 패닝 (왼쪽 오른쪽의 비율 조정)
                 if(channel == 0) // 왼쪽
@@ -419,6 +436,17 @@ void MainComponent::resized()
     int oscil2DWidth    = int(width*0.2);
     int oscil2DHeight   = int(height*0.15);
     
+    int masterVolumeLabelLayoutX    = int(width*0.89);
+    int masterVolumeLabelLayoutY    = int(height* 0.15);
+    int masterVolumeLabelWidth      = int(width*0.10);
+    int masterVolumeLabelHeight     = int(height*0.05);
+    
+    int masterVolumeSliderLayoutX   = int(width*0.89);
+    int masterVolumeSliderLayoutY   = int(height* 0.2);
+    int masterVolumeSliderWidth     = int(width*0.10);
+    int masterVolumeSliderHeight    = int(height*0.20);
+
+    
     // 첫번째 음원용 버튼
     openButton.setTopLeftPosition (buttonLayoutX,buttonLayoutY);
     openButton.setSize(buttonWidth, buttonHeight);
@@ -427,6 +455,13 @@ void MainComponent::resized()
     visualizeButton.setTopLeftPosition (buttonLayoutX,buttonLayoutY + buttonMargin * 2);
     visualizeButton.setSize(buttonWidth, buttonHeight);
    
+    // 마스터 볼륨 슬라이더
+    masterVolumeSlider.setTopLeftPosition(masterVolumeSliderLayoutX,masterVolumeSliderLayoutY);
+    masterVolumeSlider.setSize(masterVolumeSliderWidth,masterVolumeSliderHeight);
+    masterVolumeLabel.setTopLeftPosition(masterVolumeLabelLayoutX, masterVolumeLabelLayoutY);
+    masterVolumeLabel.setSize(masterVolumeLabelWidth, masterVolumeLabelHeight);
+    masterVolumeLabel.setJustificationType(juce::Justification::centred);
+    
     // 첫번째 음원용 슬라이더
     grainNumberSlider.setTopLeftPosition(sliderLayoutX,sliderLayoutY);
     grainNumberSlider.setSize(sliderWidth,sliderHeight);
