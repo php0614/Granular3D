@@ -587,6 +587,7 @@ void MainComponent::paint (juce::Graphics& g)
     {
     
         int num_ellipse = grainNumberSlider.getValue();
+        float grain_length = grainLengthSlider.getValue();
         
         currentRand = (random.nextFloat() -0.5) * 2 * panningRandomizeSlider.getValue();
         
@@ -596,7 +597,8 @@ void MainComponent::paint (juce::Graphics& g)
             pannings = panningSlider.getValue()*0.97+currentRand; // 0.97은 화면 밖에 튀어나오지 않게 임시방편
             
             g.setColour(juce::Colour::fromHSV(0.13f+i*0.01, 0.88f-i*0.01, 0.96f-i*0.01, 1.0f));
-            g.fillEllipse(getWidth() * pannings , getHeight() * (0.20 + i*0.05), 40, 40);
+            //grain_length를 원의 크기에 반영: grain_length 초기 값인 5070일 때 크기가 1이 되는 것을 기준으로 하기 위해 곱하기 (1/5070)를 해줌.
+            g.fillEllipse(getWidth() * pannings, getHeight() * (0.20 + i * 0.05), 40*((float)(grain_length/5070)), 40 * ((float)(grain_length/5070)));
         }
     }
 }
