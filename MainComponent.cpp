@@ -530,6 +530,59 @@ void MainComponent::paint (juce::Graphics& g)
     
     g.fillAll(juce::Colour::fromHSV(0.13f, 0.02f, 0.99f, 1.0f)); // 배경화면
     
+    // 3D grid 
+    g.setColour(juce::Colours::black);
+    int bx1 = 0, bx2 = getWidth() * (0.25), bx3 = getWidth() * (0.5), bx4 = getWidth() * (0.75), bx5 = getWidth();
+    int by1 = 0, by2 = getHeight() * (0.25), by3 = getHeight() * (0.5), by4 = getHeight() * (0.75), by5 = getHeight();
+
+    // 가장 안쪽 사각형 꼭짓점 정의 (x축 5개: sx1, sx2, sx3, sx4, sx5, y축 5개: sy1, sy2, sy3, sy4, sy5) 
+    int sx1 = (0.5) * getWidth() - getWidth() / (7.2);
+    int sx2 = (0.5) * getWidth() - getWidth() / (7.2) * (0.5);
+    int sx3 = getWidth();
+    int sx4 = (0.5) * getWidth() + getWidth() / (7.2) * (0.5);
+    int sx5 = (0.5) * getWidth() + getWidth() / (7.2);
+    int sy1 = (0.5) * getHeight() - getHeight() / (7.2);
+    int sy2 = (0.5) * getHeight() - getHeight() / (7.2) * (0.5);
+    int sy3 = (0.5) * getHeight();
+    int sy4 = (0.5) * getHeight() + getHeight() / (7.2) * (0.5);
+    int sy5 = (0.5) * getHeight() + getHeight() / (7.2);
+
+    for (auto i = 0; i < 8; ++i)
+    {
+        if (i == 0)
+            g.drawRect(sx1, sy1, getWidth() / (3.6), getHeight() / (3.6), 1);
+        else
+            g.drawRect((0.5) * getWidth() - getWidth() / (7.2) * pow(1.2, i), (0.5) * getHeight() - getHeight() / (7.2) * pow(1.2, i), getWidth() / (3.6) * pow(1.2, i), getHeight() / (3.6) * pow(1.2, i), 1);
+    }
+
+    // 중앙 가로선 넣기
+    g.drawHorizontalLine(by3, 0, bx5);
+    g.drawHorizontalLine(sy2, sx1, sx5);
+    g.drawHorizontalLine(sy4, sx1, sx5);
+
+    // 중앙 세로선 넣기
+    g.drawVerticalLine(bx3, 0, by5);
+    g.drawVerticalLine(sx2, sy1, sy5);
+    g.drawVerticalLine(sx4, sy1, sy5);
+
+    // 대각선 넣기
+    g.drawLine(0, 0, sx1, sy1);
+    g.drawLine(0, by5, sx1, sy5);
+    g.drawLine(bx5, 0, sx5, sy1);
+    g.drawLine(bx5, by5, sx5, sy5);
+    g.drawLine(bx2, by1, sx2, sy1);
+    g.drawLine(bx4, by1, sx4, sy1);
+    g.drawLine(bx2, by5, sx2, sy5);
+    g.drawLine(bx4, by5, sx4, sy5);
+    g.drawLine(bx1, by2, sx1, sy2);
+    g.drawLine(bx1, by4, sx1, sy4);
+    g.drawLine(bx5, by2, sx5, sy2);
+    g.drawLine(bx5, by4, sx5, sy4);
+    
+    //슬라이드바 배경
+    g.setColour(juce::Colour::fromHSV(0.13f, 0.02f, 0.99f, 1.0f));
+    g.juce::Graphics::fillRect((float)(getWidth() * (0.31)), (float)(getHeight() * (0.79)), float(getWidth() * (0.4)), float(getHeight() * (0.22)));
+    
     if (grainVisualize == true)
     {
     
