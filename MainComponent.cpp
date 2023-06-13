@@ -628,8 +628,9 @@ void MainComponent::paint (juce::Graphics& g)
             yPannings = yPanningSlider.getValue()+yCurrentRand;
             zPannings = zPanningSlider.getValue()+zCurrentRand;
             g.drawImageWithin(sphere,-0.02*width*xPannings*(1-zPannings)+(width*(xPannings+0.16)*0.74)-0.5*width*(zPannings-0.5)*(xPannings-0.5), height*(yPannings+0.12)*0.75, width*0.05*(1-zPannings*0.5), height*0.05*(1-zPannings*0.5), 0);
+            g.drawImageWithin(grain_sketch, getWidth()*0.91+0.04*getWidth()*(xPannings+0.5*zPannings), getHeight()* 0.53-0.023*getHeight()*(zPannings)+0.06*getHeight()*(yPannings-0.5), getWidth()*0.01, getHeight()*0.01, 0);
         }
-        g.drawImageWithin(grain_sketch, getWidth()*0.91+0.04*getWidth()*(xPannings+0.5*zPannings), getHeight()* 0.53-0.023*getHeight()*(zPannings)+0.06*getHeight()*(yPannings-0.5), getWidth()*0.01, getHeight()*0.01, 0);
+
 
     }
 }
