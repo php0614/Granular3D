@@ -308,8 +308,9 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                 //따라서 따로 windowPosition을 써서 별도로 진행되게 해야함
                 
                 //processBuffer가 곧 아웃풋 (1 sample)
-                processBuffer[sample] *= generateHannWindow(windowSize, windowPosition);
-                
+                //processBuffer[sample] *= generateHannWindow(windowSize, windowPosition);
+                processBuffer[sample] *= generateBlackmanWindow(windowSize, windowPosition);
+
                 // 다양한 Sound를 만들기 위해 시도하기 (1) 음원과 Knocking Sound가 함께 들림
 //                if (iteration % 10 == 0)
 //                {processBuffer[sample] = 0.1 * std::sin(2*juce::MathConstants<float>::pi*iteration/40);}
@@ -766,9 +767,22 @@ void MainComponent::visualizeButtonClicked2()
 //        oscilloscope2D2->setBounds (10, 400, getWidth()/2, getHeight()/2);
 }
 
+
+// Applying Different Window functions
+// 0 <= pos <= size-1
 double MainComponent::generateHannWindow(int size, int pos)
 {
         return 0.5 * (1 - cos(2*juce::MathConstants<float>::pi*pos/size));
+}
+
+double MainComponent::generateHammWindow(int size, int pos)
+{
+        return 0.54 - 0.46 * cos(2*juce::MathConstants<float>::pi*pos/size);
+}
+
+double MainComponent::generateBlackmanWindow(int size, int pos)
+{
+        return 0.42 -  0.5 * cos(2*juce::MathConstants<float>::pi*pos/size) + 0.08 * cos(4*juce::MathConstants<float>::pi*pos/size);
 }
 
 

@@ -66,7 +66,11 @@ private:
     
     void visualizeButtonClicked2();
     
+    // 윈도우용
+    
     double generateHannWindow(int size, int pos);
+    double generateHammWindow(int size, int pos);
+    double generateBlackmanWindow(int size, int pos);
     
 
     //==========================================================================
