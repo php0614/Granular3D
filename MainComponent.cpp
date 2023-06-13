@@ -609,15 +609,15 @@ void MainComponent::paint (juce::Graphics& g)
     //슬라이드바 배경
     g.setColour(juce::Colour::fromHSV(0.13f, 0.02f, 0.99f, 1.0f));
     g.juce::Graphics::fillRect((float)(getWidth() * (0.31)), (float)(getHeight() * (0.79)), float(getWidth() * (0.4)), float(getHeight() * (0.22)));
-    
+    g.drawImageWithin(coordinate, getWidth()*0.87, getHeight()* 0.45, getWidth()*0.14, getHeight()*0.14, 0);
+    g.drawImageWithin(person, width * 0.425, height * 0.61, width*0.15, height* 0.3, 0);
+
     if (grainVisualize == true)
     {
         int num_ellipse = grainNumberSlider.getValue();
         
         xCurrentRand = (random.nextFloat() -0.5) * 2 * panningRandomizeSlider.getValue();
-        
-        g.drawImageWithin(person, width * 0.425, height * 0.61, width*0.15, height* 0.3, 0);
-        
+            
         for (int i=0; i<num_ellipse; i++)
         {
             xCurrentRand = (random.nextFloat() -0.5) * 2 * panningRandomizeSlider.getValue();
@@ -629,7 +629,6 @@ void MainComponent::paint (juce::Graphics& g)
             zPannings = zPanningSlider.getValue()+zCurrentRand;
             g.drawImageWithin(sphere,-0.02*width*xPannings*(1-zPannings)+(width*(xPannings+0.16)*0.74)-0.5*width*(zPannings-0.5)*(xPannings-0.5), height*(yPannings+0.12)*0.75, width*0.05*(1-zPannings*0.5), height*0.05*(1-zPannings*0.5), 0);
         }
-        g.drawImageWithin(coordinate, getWidth()*0.87, getHeight()* 0.45, getWidth()*0.14, getHeight()*0.14, 0);
         g.drawImageWithin(grain_sketch, getWidth()*0.91+0.04*getWidth()*(xPannings+0.5*zPannings), getHeight()* 0.53-0.023*getHeight()*(zPannings)+0.06*getHeight()*(yPannings-0.5), getWidth()*0.01, getHeight()*0.01, 0);
 
     }
