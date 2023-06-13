@@ -206,6 +206,15 @@ private:
     
     juce::Image grain_sketch = juce::ImageFileFormat::loadFrom(juce::File("/Users/minky/Documents/GitHub/Granular3D/Image/grain_sketch.png")); // 각자 절대경로 넣어주시면 돼요
     
+    juce::Image front_lr = juce::ImageFileFormat::loadFrom(juce::File("/Users/minky/Documents/GitHub/Granular3D/Image/Front_LR_Speakers.png")); // 각자 절대경로 넣어주시면 돼요
+   
+    juce::Image front_m = juce::ImageFileFormat::loadFrom(juce::File("/Users/minky/Documents/GitHub/Granular3D/Image/Front_M_Speaker.png")); // 각자 절대경로 넣어주시면 돼요
+    
+    juce::Image rear_l = juce::ImageFileFormat::loadFrom(juce::File("/Users/minky/Documents/GitHub/Granular3D/Image/Rear_L_Speaker.png")); // 각자 절대경로 넣어주시면 돼요
+    
+    juce::Image rear_r = juce::ImageFileFormat::loadFrom(juce::File("/Users/minky/Documents/GitHub/Granular3D/Image/Rear_R_Speaker.png")); // 각자 절대경로 넣어주시면 돼요
+    
+    
     float width_ratio = 0.88;
     float height_ratio = 0.79;
     

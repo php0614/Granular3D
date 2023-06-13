@@ -610,8 +610,18 @@ void MainComponent::paint (juce::Graphics& g)
     g.setColour(juce::Colour::fromHSV(0.13f, 0.02f, 0.99f, 1.0f));
     g.juce::Graphics::fillRect((float)(getWidth() * (0.31)), (float)(getHeight() * (0.79)), float(getWidth() * (0.4)), float(getHeight() * (0.22)));
     g.drawImageWithin(coordinate, getWidth()*0.87, getHeight()* 0.45, getWidth()*0.14, getHeight()*0.14, 0);
+    
+    g.drawImageWithin(front_lr, width * 0.25, height * 0.51, width*0.15, height* 0.3, 0);
+    g.drawImageWithin(front_m, width * 0.43, height * 0.55, width*0.15, height* 0.3, 0);
+    g.drawImageWithin(front_lr, width * 0.61, height * 0.51, width*0.15, height* 0.3, 0);
+    
     g.drawImageWithin(person, width * 0.425, height * 0.61, width*0.15, height* 0.3, 0);
 
+    g.drawImageWithin(rear_l, width * 0.33, height * 0.71, width*0.15, height* 0.3, 0);
+    g.drawImageWithin(rear_r, width * 0.53, height * 0.71, width*0.15, height* 0.3, 0);
+
+    
+    
     if (grainVisualize == true)
     {
         int num_ellipse = grainNumberSlider.getValue();
