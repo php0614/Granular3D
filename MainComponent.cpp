@@ -107,17 +107,41 @@ MainComponent::MainComponent()
     panningRandomizeSlider.setColour(juce::Slider::ColourIds::trackColourId,juce::Colour::fromHSV(0.13f, 0.88f, 0.96f, 1.0f));
     panningRandomizeSlider.setColour(juce::Slider::ColourIds::thumbColourId ,juce::Colour::fromHSV(0.13f, 0.88f, 0.90f, 1.0f));
     
-    addAndMakeVisible (panningSlider);
-    panningSlider.setRange (0, 1, 0.01);
-    panningSlider.setValue(0.5);
-    panningSlider.setTitle("Panning Position");
-    addAndMakeVisible (panningLabel);
-    panningLabel.setText ("Pan Pos", juce::dontSendNotification);
-    panningLabel.attachToComponent (&panningSlider, true);
-    panningLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::grey);
-    panningSlider.setColour(juce::Slider::ColourIds::textBoxBackgroundColourId, juce::Colours::grey);
-    panningSlider.setColour(juce::Slider::ColourIds::trackColourId,juce::Colour::fromHSV(0.13f, 0.88f, 0.96f, 1.0f));
-    panningSlider.setColour(juce::Slider::ColourIds::thumbColourId ,juce::Colour::fromHSV(0.13f, 0.88f, 0.90f, 1.0f));
+    addAndMakeVisible (xPanningSlider);
+    xPanningSlider.setRange (0, 1, 0.01);
+    xPanningSlider.setValue(0.5);
+    xPanningSlider.setTitle("x Panning Position");
+    addAndMakeVisible (xPanningLabel);
+    xPanningLabel.setText ("x/y/z Pan", juce::dontSendNotification);
+    xPanningLabel.attachToComponent (&xPanningSlider, true);
+    xPanningLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::grey);
+    xPanningSlider.setColour(juce::Slider::ColourIds::textBoxBackgroundColourId, juce::Colours::grey);
+    xPanningSlider.setColour(juce::Slider::ColourIds::trackColourId,juce::Colour::fromHSV(0.13f, 0.88f, 0.96f, 1.0f));
+    xPanningSlider.setColour(juce::Slider::ColourIds::thumbColourId ,juce::Colour::fromHSV(0.13f, 0.88f, 0.90f, 1.0f));
+    
+    addAndMakeVisible (yPanningSlider);
+    yPanningSlider.setRange (0, 1, 0.01);
+    yPanningSlider.setValue(0.5);
+    yPanningSlider.setTitle("y Panning Position");
+    addAndMakeVisible (yPanningLabel);
+    //yPanningLabel.setText ("y", juce::dontSendNotification);
+    //yPanningLabel.attachToComponent (&yPanningSlider, true);
+    //yPanningLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::grey);
+    yPanningSlider.setColour(juce::Slider::ColourIds::textBoxBackgroundColourId, juce::Colours::grey);
+    yPanningSlider.setColour(juce::Slider::ColourIds::trackColourId,juce::Colour::fromHSV(0.13f, 0.88f, 0.96f, 1.0f));
+    yPanningSlider.setColour(juce::Slider::ColourIds::thumbColourId ,juce::Colour::fromHSV(0.13f, 0.88f, 0.90f, 1.0f));
+    
+    addAndMakeVisible (zPanningSlider);
+    zPanningSlider.setRange (0, 1, 0.01);
+    zPanningSlider.setValue(0.5);
+    zPanningSlider.setTitle("z Panning Position");
+    addAndMakeVisible (zPanningLabel);
+    //zPanningLabel.setText ("z", juce::dontSendNotification);
+    //zPanningLabel.attachToComponent (&yPanningSlider, true);
+    //zPanningLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::grey);
+    zPanningSlider.setColour(juce::Slider::ColourIds::textBoxBackgroundColourId, juce::Colours::grey);
+    zPanningSlider.setColour(juce::Slider::ColourIds::trackColourId,juce::Colour::fromHSV(0.13f, 0.88f, 0.96f, 1.0f));
+    zPanningSlider.setColour(juce::Slider::ColourIds::thumbColourId ,juce::Colour::fromHSV(0.13f, 0.88f, 0.90f, 1.0f));
 
     setSize (1200, 1200);
 
@@ -385,7 +409,7 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                             windowSize = grainSize;
                         
                         //grain panning 업데이트 - 하나의 grain은 각자 하나의 고정된 panning값을 지님. grain하나가 재생될 동안에는 panning position은 바뀌지 않음.
-                        currentGrainPan = pannings;
+                        currentGrainPan = xPannings;
                     }
                     else
                         windowPosition = (windowPosition+1) % grainSize;
@@ -519,11 +543,15 @@ void MainComponent::resized()
     panningRandomizeLabel.setTopLeftPosition(labelLayoutX, labelLayoutY + labelMargin*4);
     panningRandomizeLabel.setSize(labelWidth, labelHeight);
     panningRandomizeLabel.setJustificationType(juce::Justification::right);
-    panningSlider.setTopLeftPosition(sliderLayoutX, sliderLayoutY + sliderMargin*5);
-    panningSlider.setSize(sliderWidth,sliderHeight);
-    panningLabel.setTopLeftPosition(labelLayoutX, labelLayoutY + labelMargin*5);
-    panningLabel.setSize(labelWidth, labelHeight);
-    panningLabel.setJustificationType(juce::Justification::right);
+    xPanningSlider.setTopLeftPosition(sliderLayoutX, sliderLayoutY + sliderMargin*5);
+    xPanningSlider.setSize(sliderWidth*0.33,sliderHeight);
+    xPanningLabel.setTopLeftPosition(labelLayoutX, labelLayoutY + labelMargin*5);
+    xPanningLabel.setSize(labelWidth, labelHeight);
+    xPanningLabel.setJustificationType(juce::Justification::right);
+    yPanningSlider.setTopLeftPosition(sliderLayoutX+sliderWidth*0.33, sliderLayoutY + sliderMargin*5);
+    yPanningSlider.setSize(sliderWidth*0.33,sliderHeight);
+    zPanningSlider.setTopLeftPosition(sliderLayoutX+sliderWidth*0.66, sliderLayoutY + sliderMargin*5);
+    zPanningSlider.setSize(sliderWidth*0.33,sliderHeight);
     
     if (oscilloscope2D != nullptr)
     {
@@ -608,20 +636,30 @@ void MainComponent::paint (juce::Graphics& g)
     
     if (grainVisualize == true)
     {
-    
         int num_ellipse = grainNumberSlider.getValue();
         float grain_length = grainLengthSlider.getValue();
         
-        currentRand = (random.nextFloat() -0.5) * 2 * panningRandomizeSlider.getValue();
+        xCurrentRand = (random.nextFloat() -0.5) * 2 * panningRandomizeSlider.getValue();
         
         for (int i=0; i<num_ellipse; i++)
         {
-            currentRand = (random.nextFloat() -0.5) * 2 * panningRandomizeSlider.getValue();
-            pannings = panningSlider.getValue()*0.97+currentRand; // 0.97은 화면 밖에 튀어나오지 않게 임시방편
-            
+            xCurrentRand = (random.nextFloat() -0.5) * 2 * panningRandomizeSlider.getValue();
+            yCurrentRand = (random.nextFloat() -0.5) * 2 * panningRandomizeSlider.getValue();
+            zCurrentRand = (random.nextFloat() -0.5) * 2 * panningRandomizeSlider.getValue();
+
+
+            xPannings = xPanningSlider.getValue()*0.97+xCurrentRand; // 0.97은 화면 밖에 튀어나오지 않게 임시방편
+            yPannings = yPanningSlider.getValue()*0.97+yCurrentRand; // 0.97은 화면 밖에 튀어나오지 않게 임시방편
+            zPannings = zPanningSlider.getValue()*0.97+zCurrentRand; // 0.97은 화면 밖에 튀어나오지 않게 임시방편
+
             g.setColour(juce::Colour::fromHSV(0.13f+i*0.01, 0.88f-i*0.01, 0.96f-i*0.01, 1.0f));
+            
+            g.drawImageWithin(sphere, getWidth() * xPannings, getHeight() * yPannings, 40*((float)(grain_length/5070))*(0.5 + 1.5 * zPannings), 40 * ((float)(grain_length/5070))*(0.5 + 1.5 * zPannings), 0);
+            
+            //g.setColour(juce::Colour::fromHSV(0.13f+i*0.01, 0.88f-i*0.01, 0.96f-i*0.01, 1.0f));
             //grain_length를 원의 크기에 반영: grain_length 초기 값인 5070일 때 크기가 1이 되는 것을 기준으로 하기 위해 곱하기 (1/5070)를 해줌.
-            g.fillEllipse(getWidth() * pannings, getHeight() * (0.20 + i * 0.05), 40*((float)(grain_length/5070)), 40 * ((float)(grain_length/5070)));
+            //g.fillEllipse(getWidth() * pannings, getHeight() * (0.20 + i * 0.05), 40*((float)(grain_length/5070)), 40 * ((float)(grain_length/5070)));
+            
         }
     }
 }

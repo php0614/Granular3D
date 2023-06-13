@@ -108,7 +108,10 @@ private:
     juce::Slider    grainLengthSlider;      // 세번째 슬라이더: 불러올 오디오 그레인의 길이를 결정한다
     juce::Slider    grainFrequencySlider;   // 네번째 슬라이더: 불러온 그레인의 개수를 결정한다
     juce::Slider    panningRandomizeSlider; // 다섯번째 슬라이더: 패닝의 랜덤성을 결정한다
-    juce::Slider    panningSlider;          // 여섯번째 슬라이더: 패닝의 위치를 결정한다
+    juce::Slider    xPanningSlider;          // 여섯번째 슬라이더: x 패닝의 위치를 결정한다
+    juce::Slider    yPanningSlider;          // 일곱번째 슬라이더: y 패닝의 위치를 결정한다
+    juce::Slider    zPanningSlider;          // 여덟번째 슬라이더: z 패닝의 위치를 결정한다
+
     
     juce::Label  masterVolumeLabel;         // 각 슬라이더에 대한 레이블링 적용
     juce::Label  grainNumberLabel;
@@ -116,7 +119,9 @@ private:
     juce::Label  grainLengthLabel;
     juce::Label  grainFrequencyLabel;
     juce::Label  panningRandomizeLabel;
-    juce::Label  panningLabel;
+    juce::Label  xPanningLabel;
+    juce::Label  yPanningLabel;
+    juce::Label  zPanningLabel;
     
     // 두번째 음원용
     juce::TextButton openButton2;
@@ -129,7 +134,10 @@ private:
     juce::Slider    panningSlider2;          // 다섯번째 슬라이더: 패닝의 위치를 결정한다
 
     
-    float pannings = 0.5;
+    float xPannings = 0.5;
+    float yPannings = 0.5;
+    float zPannings = 0.5;
+
     float pannings2 = 0.5;
     
     ///////// 첫번째 음원
@@ -177,7 +185,10 @@ private:
     juce::AudioSampleBuffer fileBuffer2;
     Oscilloscope2D * oscilloscope2D2;
     
-    float currentRand;
+    float xCurrentRand;
+    float yCurrentRand;
+    float zCurrentRand;
+
     float currentRand2;
     juce::Random random;
     
@@ -186,6 +197,8 @@ private:
     int windowType = 1;
     
     bool grainVisualize = true;
+    
+    juce::Image sphere = juce::ImageFileFormat::loadFrom(juce::File("/Users/minky/Documents/GitHub/Granular3D/Image/3d_sphere.png")); // 각자 절대경로 넣어주시면 돼요
     
    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
