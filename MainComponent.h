@@ -202,6 +202,10 @@ private:
     
     juce::Image person = juce::ImageFileFormat::loadFrom(juce::File("/Users/minky/Documents/GitHub/Granular3D/Image/person.png")); // 각자 절대경로 넣어주시면 돼요
     
+    juce::Image coordinate = juce::ImageFileFormat::loadFrom(juce::File("/Users/minky/Documents/GitHub/Granular3D/Image/coordinate.png")); // 각자 절대경로 넣어주시면 돼요
+    
+    juce::Image grain_sketch = juce::ImageFileFormat::loadFrom(juce::File("/Users/minky/Documents/GitHub/Granular3D/Image/grain_sketch.png")); // 각자 절대경로 넣어주시면 돼요
+    
     float width_ratio = 0.88;
     float height_ratio = 0.79;
     
