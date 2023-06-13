@@ -52,12 +52,31 @@ private:
         grainVisualize = !grainVisualize;
     }
     
+    std::string windowName(int num){
+        switch (num){
+            case 0: return "Rect";
+            case 1: return "Hann";
+            case 2: return "Hamm";
+            case 3: return "Blackman";
+        }
+        return ""; // Exception
+    }
+    
+    void windowTypeButtonClicked(){
+        windowType += 1;
+        windowType %= 4;
+        std::cout << "windowType: " << windowType;
+        windowTypeButton.setButtonText ("Window Type:\n"+windowName(windowType));
+
+    }
+    
     // 첫번째 음원용
     void openButtonClicked();
 
     void clearButtonClicked();
     
     void visualizeButtonClicked();
+
     
     // 두번째 음원용
     void openButtonClicked2();
@@ -75,7 +94,8 @@ private:
 
     //==========================================================================
     
-    juce::TextButton grainVisualizeButton; 
+    juce::TextButton grainVisualizeButton;
+    juce::TextButton windowTypeButton;
     
     // 첫번째 음원용
     juce::TextButton openButton;
@@ -163,7 +183,8 @@ private:
     
     //juce::dsp::WindowingFunction<float> window();
     int iteration = 0;
-
+    int windowType = 1;
+    
     bool grainVisualize = true;
     
    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)

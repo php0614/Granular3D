@@ -9,6 +9,10 @@ MainComponent::MainComponent()
     grainVisualizeButton.setButtonText ("VIS ON/OFF");
     grainVisualizeButton.onClick = [this] { grainVisualizeButtonClicked(); };
     
+    addAndMakeVisible (windowTypeButton); // windowType 변경
+    windowTypeButton.setButtonText ("Window Type:\n"+windowName(windowType));
+    windowTypeButton.onClick = [this] { windowTypeButtonClicked(); };
+    
     //첫번째 음원용
     addAndMakeVisible (openButton); // "Adds" a child component to this one, and also makes the child "visible" if it isn't already.
     openButton.setButtonText ("Open Source 1");
@@ -309,8 +313,22 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                 
                 //processBuffer가 곧 아웃풋 (1 sample)
                 //processBuffer[sample] *= generateHannWindow(windowSize, windowPosition);
-                processBuffer[sample] *= generateBlackmanWindow(windowSize, windowPosition);
-
+                switch (windowType)
+                {
+                    // Rectangular window
+                    case 0: continue;
+                    
+                    // Hanning window (Hannwindow)
+                    case 1: processBuffer[sample] *= generateHannWindow(windowSize, windowPosition);
+                    
+                    // Hamming window (Hammwindow)
+                    case 2: processBuffer[sample] *= generateHammWindow(windowSize, windowPosition);
+                    
+                    // Blackman window
+                    case 3: processBuffer[sample] *= generateBlackmanWindow(windowSize, windowPosition);
+                    
+                }
+                
                 // 다양한 Sound를 만들기 위해 시도하기 (1) 음원과 Knocking Sound가 함께 들림
 //                if (iteration % 10 == 0)
 //                {processBuffer[sample] = 0.1 * std::sin(2*juce::MathConstants<float>::pi*iteration/40);}
@@ -455,6 +473,10 @@ void MainComponent::resized()
     // Grain Visualize 버튼
     grainVisualizeButton.setTopLeftPosition (buttonLayoutX, buttonLayoutY - buttonMargin);
     grainVisualizeButton.setSize (width*0.1, buttonHeight);
+    
+    // windowType 버튼
+    windowTypeButton.setTopLeftPosition (masterVolumeSliderLayoutX, buttonLayoutY - buttonMargin*2);
+    windowTypeButton.setSize (width*0.1, buttonHeight);
     
     // 첫번째 음원용 버튼
     openButton.setTopLeftPosition (buttonLayoutX,buttonLayoutY);
