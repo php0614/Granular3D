@@ -200,5 +200,8 @@ private:
     
     juce::Image sphere = juce::ImageFileFormat::loadFrom(juce::File("/Users/minky/Documents/GitHub/Granular3D/Image/3d_sphere.png")); // 각자 절대경로 넣어주시면 돼요
     
+    juce::Image person = juce::ImageFileFormat::loadFrom(juce::File("/Users/minky/Documents/GitHub/Granular3D/Image/person.png")); // 각자 절대경로 넣어주시면 돼요
+    
+    
    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

@@ -641,6 +641,8 @@ void MainComponent::paint (juce::Graphics& g)
         
         xCurrentRand = (random.nextFloat() -0.5) * 2 * panningRandomizeSlider.getValue();
         
+        g.drawImageWithin(person, getWidth() * 0.45, getHeight() * 0.57, getWidth()*0.1, getHeight()* 0.2, 0);
+        
         for (int i=0; i<num_ellipse; i++)
         {
             xCurrentRand = (random.nextFloat() -0.5) * 2 * panningRandomizeSlider.getValue();
